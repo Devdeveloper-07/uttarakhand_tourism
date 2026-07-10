@@ -789,9 +789,6 @@ function toggleDescription() {
     }
 }
 
-// ============================================
-// AMENITIES TOGGLE
-// ============================================
 function toggleAmenities() {
     const grid = document.getElementById('mmtAmenitiesGrid');
     const btn = document.getElementById('mmtShowAllAmenities');
