@@ -1,0 +1,294 @@
+/* ============================================
+   FORM STYLES - CREATE / EDIT HOTEL
+   ============================================ */
+
+/* Alert Danger */
+/* form */
+.alert-modern.alert-danger {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.alert-modern.alert-danger .alert-icon {
+    color: var(--danger);
+}
+
+/* Form Styles */
+.modern-form .form-group {
+    margin-bottom: 0;
+}
+
+.modern-form .form-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.modern-form .form-label i {
+    font-size: 14px;
+}
+
+.modern-input {
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: var(--bg-body);
+}
+
+.modern-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    background: white;
+}
+
+.modern-input::placeholder {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.modern-input-group {
+    background: var(--bg-body);
+    border: 1.5px solid var(--border-color);
+    border-right: none;
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    padding: 12px 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.modern-input-group + .modern-input {
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.form-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    display: block;
+}
+
+/* File Upload */
+.file-upload-wrapper {
+    position: relative;
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.file-upload-preview {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius);
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.2s ease;
+    background: var(--bg-body);
+}
+
+.file-upload-preview i {
+    font-size: 36px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: block;
+}
+
+.file-upload-preview span {
+    display: block;
+    font-size: 14px;
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.file-upload-preview small {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.file-upload-preview:hover,
+.file-upload-preview.dragover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.file-upload-preview.has-preview {
+    border-style: solid;
+    border-color: var(--primary);
+    padding: 20px;
+}
+
+.file-upload-preview.has-preview i,
+.file-upload-preview.has-preview span,
+.file-upload-preview.has-preview small {
+    display: none;
+}
+
+/* Status Toggle */
+.status-toggle-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.status-option {
+    flex: 1;
+    margin: 0 !important;
+}
+
+.status-option .form-check-input {
+    display: none;
+}
+
+.status-option .form-check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+    justify-content: center;
+}
+
+.status-option .form-check-input:checked + .form-check-label {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-indicator.active {
+    background: var(--success);
+}
+
+.status-indicator.inactive {
+    background: var(--danger);
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-actions > div {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .form-actions .btn {
+        flex: 1;
+    }
+
+    .status-toggle-group {
+        flex-direction: column;
+    }
+}
+
+
+
+/* edit */
+
+/* ============================================
+   EDIT FORM - CURRENT IMAGE PREVIEW
+   ============================================ */
+
+.current-image-preview {
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    background: var(--bg-body);
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.current-image-preview img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.current-image-preview .image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    padding: 20px 16px 12px;
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.current-image-preview .image-overlay i {
+    margin-right: 6px;
+    color: var(--success);
+}
+
+.current-image-preview .no-image {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.current-image-preview .no-image i {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 12px;
+    color: var(--border-color);
+}
+
+.current-image-preview .no-image span {
+    font-size: 14px;
+}
+
+/* Info Box */
+.info-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--bg-body);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.info-box i {
+    color: var(--primary);
+}
