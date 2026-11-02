@@ -55,4 +55,14 @@ class Package extends Model
     {
         return $this->hasMany(BookingPackage::class);
     }
+
+    public function getBookingPriceAttribute(): float
+    {
+        $price = (float) $this->price;
+        $discountPrice = (float) $this->discount_price;
+
+        return $discountPrice > 0 && $discountPrice < $price
+            ? $discountPrice
+            : $price;
+    }
 }

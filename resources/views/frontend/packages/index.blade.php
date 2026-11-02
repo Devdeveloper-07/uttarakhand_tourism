@@ -127,98 +127,42 @@
             <p class="section-desc">Handpicked destinations for an unforgettable journey through the Himalayas</p>
         </div>
 
-        <div class="row g-4">
-            @forelse($packages as $package)
-            <div class="col-lg-4 col-md-6">
-                <div class="package-card-premium h-100">
-                    <!-- Image Container -->
-                    <div class="package-image-wrap">
-                        @if($package->thumbnail)
-                        <img src="{{ asset('uploads/packages/'.$package->thumbnail) }}" alt="{{ $package->package_name }}" class="package-image" loading="lazy">
-                        @else
-                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop" alt="Package" class="package-image" loading="lazy">
+        @forelse($packages as $package)
+            <article class="mmt-list-card">
+                <div class="mmt-img-wrap">
+                    @if($package->thumbnail)
+                        <img src="{{ asset('uploads/packages/'.$package->thumbnail) }}" alt="{{ $package->package_name }}" loading="lazy">
+                    @else
+                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop" alt="Package">
+                    @endif
+                    @if ($package->duration)
+                        <span class="mmt-badge">{{ $package->duration }}</span>
+                    @endif
+                </div>
+                <div class="mmt-card-body">
+                    <h4>{{ $package->package_name }}</h4>
+                    <div class="mmt-meta">
+                        <i class="fa-solid fa-location-dot"></i> {{ $package->destination }}
+                        @if($package->duration)
+                            &nbsp; · &nbsp; <i class="fa-regular fa-clock"></i> {{ $package->duration }}
                         @endif
-
-                        <div class="package-badge">
-                            <i class="fa-solid fa-crown"></i> Premium
-                        </div>
-
-                        <!-- Optional: Show discount badge if you have original_price field -->
-                        {{--
-                        <div class="discount-badge">
-                            <i class="fa-solid fa-percent"></i> 20% OFF
-                        </div>
-                        --}}
-
-                        <div class="package-overlay">
-                            <span class="image-meta-overlay">
-                                <i class="fa-solid fa-location-dot"></i> {{ $package->destination }}
-                            </span>
-                            <a href="{{ route('package.details',$package->id) }}" class="btn-view" title="View Details">
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </a>
-                        </div>
                     </div>
-
-                    <!-- Card Body -->
-                    <div class="package-body-premium">
-                        <div class="package-meta">
-                            <span class="meta-location">
-                                <i class="fa-solid fa-location-dot"></i> {{ $package->destination }}
-                            </span>
-                            <span class="meta-duration">
-                                <i class="fa-regular fa-clock"></i> {{ $package->duration }}
-                            </span>
-                        </div>
-
-                        <h4 class="package-title">{{ $package->package_name }}</h4>
-
-                        <p class="package-desc">
-                            {!! \Illuminate\Support\Str::limit(strip_tags($package->description), 100) !!}
-                        </p>
-
-                        <!-- Optional Rating (uncomment if you have rating data) -->
-                        {{--
-                        <div class="package-rating">
-                            <div class="rating-stars">
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star-half-stroke"></i>
-                            </div>
-                            <span class="rating-text">4.5 (128 reviews)</span>
-                        </div>
-                        --}}
-
-                        <div class="package-footer-premium">
-                            <div class="price-block">
-                                <span class="price-label">Starting from</span>
-                                <h5 class="price-value">
-                                    ₹{{ number_format($package->price) }}
-                                    <span>/ person</span>
-                                    {{-- <span class="original-price">₹{{ number_format($package->price * 1.2) }}</span> --}}
-                                </h5>
-                            </div>
-                            <a href="{{ route('package.details',$package->id) }}" class="btn-details">
-                                View Details <i class="fa-solid fa-chevron-right"></i>
-                            </a>
-                        </div>
-                    </div>
+                    <p>{!! \Illuminate\Support\Str::limit(strip_tags($package->description), 140) !!}</p>
                 </div>
-            </div>
-            @empty
-            <div class="col-12">
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fa-solid fa-suitcase-rolling"></i>
-                    </div>
-                    <h4>No Packages Found</h4>
-                    <p>Try adjusting your search filters or browse all destinations to find your perfect trip.</p>
+                <div class="mmt-card-price">
+                    <span class="mmt-unit">Starting from</span>
+                    <div class="mmt-price">₹{{ number_format($package->booking_price) }}</div>
+                    <span class="mmt-unit">per person</span>
+                    <a href="{{ route('package.details',$package->id) }}" class="mmt-book">BOOK NOW</a>
                 </div>
+            </article>
+        @empty
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fa-solid fa-suitcase-rolling"></i></div>
+                <h4>No Packages Found</h4>
+                <p>Try adjusting your search filters or browse all destinations to find your perfect trip.</p>
             </div>
-            @endforelse
-        </div>
+        @endforelse
 
         <!-- Pagination -->
         <div class="pagination-wrap">

@@ -24,9 +24,10 @@
     <link rel="stylesheet" href="{{ asset('frontend/css/header.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/css/footer.css') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="{{ asset('frontend/css/premium.css') }}?v={{ filemtime(public_path('frontend/css/premium.css')) }}">
 </head>
 
-<body>
+<body class="frontend-site">
 
     @include('frontend.partials.header')
 

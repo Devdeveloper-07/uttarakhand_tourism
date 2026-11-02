@@ -16,6 +16,7 @@ class HomeController extends Controller
     public function index()
     {
         $featuredHotels = Hotel::where('status', 1)
+            ->with(['amenities' => fn ($query) => $query->where('status', 1)])
             ->latest()
             ->take(6)
             ->get();
@@ -34,11 +35,53 @@ class HomeController extends Controller
             ->take(6)
             ->get();
 
+        $locations = Hotel::where('status', 1)
+            ->select('location')
+            ->distinct()
+            ->orderBy('location')
+            ->pluck('location');
+
+        $destinations = Package::where('status', 1)
+            ->select('destination')
+            ->distinct()
+            ->orderBy('destination')
+            ->pluck('destination');
+
+        $homeStats = [
+            [
+                'count' => Hotel::where('status', 1)->count(),
+                'label' => 'Available Stays',
+                'icon' => 'fa-hotel',
+            ],
+            [
+                'count' => Package::where('status', 1)->count(),
+                'label' => 'Tour Packages',
+                'icon' => 'fa-route',
+            ],
+            [
+                'count' => Hotel::where('status', 1)
+                    ->whereNotNull('location')
+                    ->where('location', '!=', '')
+                    ->distinct()
+                    ->count('location'),
+                'label' => 'Hotel Locations',
+                'icon' => 'fa-location-dot',
+            ],
+            [
+                'count' => Testimonial::where('status', 1)->count(),
+                'label' => 'Traveler Stories',
+                'icon' => 'fa-comments',
+            ],
+        ];
+
         return view('frontend.home', compact(
             'featuredHotels',
             'featuredPackages',
             'galleries',
-            'testimonials'
+            'testimonials',
+            'homeStats',
+            'locations',
+            'destinations'
         ));
     }
 

@@ -59,9 +59,15 @@
 
                 <div class="col-md-4 text-center">
 
-                    @if(isset($booking->hotel->featured_image))
+                    @if($booking->item_type === 'hotel' && $booking->item?->thumbnail)
 
-                        <img src="{{ asset('uploads/hotels/'.$booking->hotel->featured_image) }}"
+                        <img src="{{ asset('uploads/hotels/'.$booking->item->thumbnail) }}"
+                             class="img-fluid rounded shadow"
+                             style="height:220px;width:100%;object-fit:cover;">
+
+                    @elseif($booking->item_type === 'package' && $booking->item?->thumbnail)
+
+                        <img src="{{ asset('uploads/packages/'.$booking->item->thumbnail) }}"
                              class="img-fluid rounded shadow"
                              style="height:220px;width:100%;object-fit:cover;">
 
@@ -88,7 +94,7 @@
 
                             <td>
 
-                                #BK-{{ $booking->id }}
+                                {{ $booking->booking_no ?? '#BK-'.$booking->id }}
 
                             </td>
 
@@ -98,13 +104,13 @@
 
                             <th>
 
-                                Hotel Name
+                                Trip
 
                             </th>
 
                             <td>
 
-                                {{ $booking->hotel->hotel_name ?? '-' }}
+                                {{ $booking->item?->hotel_name ?? $booking->item?->package_name ?? '-' }}
 
                             </td>
 
@@ -120,7 +126,7 @@
 
                             <td>
 
-                                {{ $booking->check_in ?? '-' }}
+                                {{ $booking->check_in?->format('d M Y') ?? $booking->travel_date?->format('d M Y') ?? '-' }}
 
                             </td>
 
@@ -136,7 +142,7 @@
 
                             <td>
 
-                                {{ $booking->check_out ?? '-' }}
+                                {{ $booking->check_out?->format('d M Y') ?? '-' }}
 
                             </td>
 
@@ -152,7 +158,7 @@
 
                             <td>
 
-                                {{ $booking->guests ?? '-' }}
+                                {{ $booking->guest ?? '-' }}
 
                             </td>
 
@@ -185,7 +191,7 @@
                             <td>
 
                                 @php
-                                    $status = strtolower($booking->status ?? 'pending');
+                                    $status = strtolower($booking->booking_status ?? 'pending');
                                 @endphp
 
                                 @if($status=='confirmed')

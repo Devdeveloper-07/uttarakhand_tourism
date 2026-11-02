@@ -422,14 +422,22 @@
 
                     {{-- Booking Form --}}
                     <div class="mmt-booking-body" id="mmtBookingBody">
-                        <form id="mmtBookingForm" class="mmt-booking-form">
+                        @if ($errors->any())
+                            <div class="alert alert-danger" role="alert">
+                                @foreach ($errors->all() as $error)
+                                    <div>{{ $error }}</div>
+                                @endforeach
+                            </div>
+                        @endif
+                        <form id="mmtBookingForm" class="mmt-booking-form" method="POST" action="{{ route('hotel.booking.start', $hotel) }}">
+                            @csrf
                             <div class="mmt-form-row" id="mmtFormRow">
                                 <div class="mmt-form-group" id="mmtFormGroupCheckin">
                                     <label for="mmtCheckinDate" id="mmtLabelCheckin">
                                         <i class="fa-regular fa-calendar" id="mmtIconCheckin"></i> Check-in
                                     </label>
                                     <div class="mmt-input-box" id="mmtInputBoxCheckin">
-                                        <input type="date" id="mmtCheckinDate" required>
+                                        <input type="date" name="check_in" id="mmtCheckinDate" min="{{ now()->toDateString() }}" value="{{ old('check_in') }}" required>
                                     </div>
                                 </div>
                                 <div class="mmt-form-group" id="mmtFormGroupCheckout">
@@ -437,7 +445,7 @@
                                         <i class="fa-regular fa-calendar-check" id="mmtIconCheckout"></i> Check-out
                                     </label>
                                     <div class="mmt-input-box" id="mmtInputBoxCheckout">
-                                        <input type="date" id="mmtCheckoutDate" required>
+                                        <input type="date" name="check_out" id="mmtCheckoutDate" min="{{ now()->addDay()->toDateString() }}" value="{{ old('check_out') }}" required>
                                     </div>
                                 </div>
                             </div>
@@ -447,13 +455,11 @@
                                     <i class="fa-solid fa-user-group" id="mmtIconGuests"></i> Guests
                                 </label>
                                 <div class="mmt-input-box" id="mmtInputBoxGuests">
-                                    <select id="mmtGuestSelect" required>
-                                        <option value="" disabled selected>Select guests</option>
-                                        <option value="1">1 Guest</option>
-                                        <option value="2">2 Guests</option>
-                                        <option value="3">3 Guests</option>
-                                        <option value="4">4 Guests</option>
-                                        <option value="5">5+ Guests</option>
+                                    <select id="mmtGuestSelect" name="guests" required>
+                                        <option value="" disabled {{ old('guests') ? '' : 'selected' }}>Select guests</option>
+                                        @foreach (range(1, 20) as $guestCount)
+                                            <option value="{{ $guestCount }}" {{ old('guests') == $guestCount ? 'selected' : '' }}>{{ $guestCount }} {{ $guestCount === 1 ? 'Guest' : 'Guests' }}</option>
+                                        @endforeach
                                     </select>
                                     <i class="fa-solid fa-chevron-down mmt-select-arrow" id="mmtGuestSelectArrow"></i>
                                 </div>
@@ -464,14 +470,34 @@
                                     <i class="fa-solid fa-bed" id="mmtIconRooms"></i> Rooms
                                 </label>
                                 <div class="mmt-input-box" id="mmtInputBoxRooms">
-                                    <select id="mmtRoomSelect" required>
-                                        <option value="" disabled selected>Select rooms</option>
-                                        <option value="1">1 Room</option>
-                                        <option value="2">2 Rooms</option>
-                                        <option value="3">3 Rooms</option>
-                                        <option value="4">4+ Rooms</option>
+                                    <select id="mmtRoomSelect" name="rooms" required>
+                                        <option value="" disabled {{ old('rooms') ? '' : 'selected' }}>Select rooms</option>
+                                        @foreach (range(1, 4) as $roomCount)
+                                            <option value="{{ $roomCount }}" {{ old('rooms') == $roomCount ? 'selected' : '' }}>{{ $roomCount.' '.($roomCount === 1 ? 'Room' : 'Rooms') }}</option>
+                                        @endforeach
                                     </select>
                                     <i class="fa-solid fa-chevron-down mmt-select-arrow" id="mmtRoomSelectArrow"></i>
+                                </div>
+                            </div>
+
+                            <div class="mmt-form-group" id="mmtFormGroupName">
+                                <label for="mmtGuestName"><i class="fa-solid fa-user"></i> Full Name</label>
+                                <div class="mmt-input-box">
+                                    <input type="text" name="name" id="mmtGuestName" value="{{ old('name') }}" autocomplete="name" maxlength="120" required>
+                                </div>
+                            </div>
+
+                            <div class="mmt-form-group" id="mmtFormGroupPhone">
+                                <label for="mmtGuestPhone"><i class="fa-solid fa-phone"></i> Phone Number</label>
+                                <div class="mmt-input-box">
+                                    <input type="tel" name="phone" id="mmtGuestPhone" value="{{ old('phone') }}" autocomplete="tel" maxlength="24" required>
+                                </div>
+                            </div>
+
+                            <div class="mmt-form-group" id="mmtFormGroupEmail">
+                                <label for="mmtGuestEmail"><i class="fa-solid fa-envelope"></i> Email</label>
+                                <div class="mmt-input-box">
+                                    <input type="email" name="email" id="mmtGuestEmail" value="{{ old('email') }}" autocomplete="email" maxlength="255" required>
                                 </div>
                             </div>
 
@@ -479,15 +505,15 @@
                             <div class="mmt-trust-features" id="mmtTrustFeatures">
                                 <div class="mmt-trust-item" id="mmtTrust1">
                                     <div class="mmt-trust-icon" id="mmtTrustIcon1"><i class="fa-solid fa-check"></i></div>
-                                    <span id="mmtTrustText1">Free cancellation till check-in</span>
+                                    <span id="mmtTrustText1">Contact us for cancellation policy</span>
                                 </div>
                                 <div class="mmt-trust-item" id="mmtTrust2">
                                     <div class="mmt-trust-icon" id="mmtTrustIcon2"><i class="fa-solid fa-check"></i></div>
-                                    <span id="mmtTrustText2">No prepayment needed</span>
+                                    <span id="mmtTrustText2">Secure online payment</span>
                                 </div>
                                 <div class="mmt-trust-item" id="mmtTrust3">
                                     <div class="mmt-trust-icon" id="mmtTrustIcon3"><i class="fa-solid fa-check"></i></div>
-                                    <span id="mmtTrustText3">Instant confirmation</span>
+                                    <span id="mmtTrustText3">Confirmation after successful payment</span>
                                 </div>
                                 <div class="mmt-trust-item" id="mmtTrust4">
                                     <div class="mmt-trust-icon" id="mmtTrustIcon4"><i class="fa-solid fa-check"></i></div>

@@ -387,6 +387,7 @@
                 }
             }
         </style>
+        <link rel="stylesheet" href="{{ asset('frontend/css/premium.css') }}">
     </head>
     <body>
         {{ $slot }}

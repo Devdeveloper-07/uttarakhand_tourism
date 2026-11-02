@@ -18,7 +18,7 @@
 
             <p class="page-subtitle">
 
-                View and manage your hotel bookings.
+                View and manage your hotel and package bookings.
 
             </p>
 
@@ -64,7 +64,7 @@
 
                             <th>Booking ID</th>
 
-                            <th>Hotel</th>
+                            <th>Trip</th>
 
                             <th>Check In</th>
 
@@ -98,31 +98,31 @@
 
                             <td>
 
-                                #BK-{{ $booking->id }}
+                                {{ $booking->booking_no ?? '#BK-'.$booking->id }}
 
                             </td>
 
                             <td>
 
-                                {{ $booking->hotel->hotel_name ?? 'N/A' }}
+                                {{ $booking->item?->hotel_name ?? $booking->item?->package_name ?? 'N/A' }}
 
                             </td>
 
                             <td>
 
-                                {{ $booking->check_in ?? '-' }}
+                                {{ $booking->check_in?->format('d M Y') ?? $booking->travel_date?->format('d M Y') ?? '-' }}
 
                             </td>
 
                             <td>
 
-                                {{ $booking->check_out ?? '-' }}
+                                {{ $booking->check_out?->format('d M Y') ?? '-' }}
 
                             </td>
 
                             <td>
 
-                                {{ $booking->guests ?? '-' }}
+                                {{ $booking->guest ?? '-' }}
 
                             </td>
 
@@ -130,7 +130,7 @@
 
                                 @php
 
-                                    $status = strtolower($booking->status ?? 'pending');
+                                    $status = strtolower($booking->booking_status ?? 'pending');
 
                                 @endphp
 

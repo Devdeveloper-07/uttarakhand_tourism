@@ -167,111 +167,44 @@
             <p class="section-desc">Handpicked hotels for an unforgettable stay in the Himalayas</p>
         </div>
 
-        <div class="row g-4">
-            @forelse($hotels as $hotel)
-            <div class="col-lg-4 col-md-6">
-                <div class="hotel-card-premium h-100">
-                    <!-- Image Container -->
-                    <div class="hotel-image-wrap">
-                        @if($hotel->thumbnail)
-                        <img src="{{ asset('uploads/hotels/'.$hotel->thumbnail) }}" alt="{{ $hotel->hotel_name }}" class="hotel-image" loading="lazy">
-                        @else
-                        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop" alt="{{ $hotel->hotel_name }}" class="hotel-image" loading="lazy">
-                        @endif
-
-                        <div class="hotel-badge">
-                            <i class="fa-solid fa-crown"></i> Premium
-                        </div>
-
-                        @php
-                            $originalPrice = ($hotel->price ?? $hotel->starting_price ?? 0) * 1.3;
-                            $discountPercent = 30;
-                        @endphp
-                        @if($originalPrice > 0)
-                        <div class="discount-badge">
-                            <i class="fa-solid fa-percent"></i> {{ $discountPercent }}% OFF
-                        </div>
-                        @endif
-
-                        <div class="hotel-overlay">
-                            <span class="image-meta-overlay">
-                                <i class="fa-solid fa-location-dot"></i> {{ $hotel->location }}
-                            </span>
-                            <a href="{{ route('hotel.details', $hotel->id) }}" class="btn-view" title="View Details">
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Card Body -->
-                    <div class="hotel-body-premium">
-                        <div class="hotel-meta">
-                            <span class="meta-location">
-                                <i class="fa-solid fa-location-dot"></i> {{ $hotel->location }}
-                            </span>
-                            <span class="meta-type">
-                                <i class="fa-solid fa-hotel"></i> Hotel
-                            </span>
-                        </div>
-
-                        <h4 class="hotel-title">{{ $hotel->hotel_name }}</h4>
-
-                        <p class="hotel-desc">
-                            {!! \Illuminate\Support\Str::limit(strip_tags($hotel->description), 100) !!}
-                        </p>
-
-                        <div class="hotel-rating">
-                            <div class="rating-stars">
-                                @for($i = 1; $i <= 5; $i++)
-                                    @if($i <= floor($hotel->rating ?? 4.5))
-                                        <i class="fa-solid fa-star"></i>
-                                    @elseif($i - 0.5 <= ($hotel->rating ?? 4.5))
-                                        <i class="fa-solid fa-star-half-stroke"></i>
-                                    @else
-                                        <i class="fa-regular fa-star"></i>
-                                    @endif
-                                @endfor
-                            </div>
-                            <span class="rating-text">{{ number_format($hotel->rating ?? 4.5, 1) }} ({{ $hotel->reviews_count ?? rand(100,500) }} reviews)</span>
-                        </div>
-
-                        <div class="hotel-features-mini">
-                            <span><i class="fa-solid fa-wifi"></i> WiFi</span>
-                            <span><i class="fa-solid fa-utensils"></i> Food</span>
-                            <span><i class="fa-solid fa-car"></i> Parking</span>
-                            <span><i class="fa-solid fa-snowflake"></i> AC</span>
-                        </div>
-
-                        <div class="hotel-footer-premium">
-                            <div class="price-block">
-                                <span class="price-label">per night</span>
-                                <h5 class="price-value">
-                                    ₹{{ number_format($hotel->price ?? $hotel->starting_price ?? 0) }}
-                                    <span>/ night</span>
-                                    @if($originalPrice > 0)
-                                    <span class="original-price">₹{{ number_format($originalPrice) }}</span>
-                                    @endif
-                                </h5>
-                            </div>
-                            <a href="{{ route('hotel.details', $hotel->id) }}" class="btn-details">
-                                View Details <i class="fa-solid fa-chevron-right"></i>
-                            </a>
-                        </div>
+        @forelse($hotels as $hotel)
+            @php
+                $nightPrice = $hotel->price ?? $hotel->starting_price ?? 0;
+                $originalPrice = $nightPrice * 1.3;
+            @endphp
+            <article class="mmt-hotel-card">
+                <div class="mmt-img-wrap">
+                    @if($hotel->thumbnail)
+                        <img src="{{ asset('uploads/hotels/'.$hotel->thumbnail) }}" alt="{{ $hotel->hotel_name }}" loading="lazy">
+                    @else
+                        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop" alt="{{ $hotel->hotel_name }}">
+                    @endif
+                </div>
+                <div class="mmt-card-body">
+                    <h4>{{ $hotel->hotel_name }}</h4>
+                    <div class="mmt-meta"><i class="fa-solid fa-location-dot"></i> {{ $hotel->location }}</div>
+                    <p>{!! \Illuminate\Support\Str::limit(strip_tags($hotel->description), 120) !!}</p>
+                    <div class="mmt-amenities">
+                        <span>WiFi</span><span>Parking</span><span>Restaurant</span>
                     </div>
                 </div>
-            </div>
-            @empty
-            <div class="col-12">
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fa-solid fa-hotel"></i>
-                    </div>
-                    <h4>No Hotels Found</h4>
-                    <p>Try adjusting your search filters or browse all locations to find your perfect stay.</p>
+                <div class="mmt-card-price">
+                    <div class="mmt-rating">{{ number_format($hotel->rating ?? 4.5, 1) }}/5</div>
+                    @if($originalPrice > 0)
+                        <div class="mmt-old">₹{{ number_format($originalPrice) }}</div>
+                    @endif
+                    <div class="mmt-price">₹{{ number_format($nightPrice) }}</div>
+                    <span class="mmt-unit">per night + taxes</span>
+                    <a href="{{ route('hotel.details', $hotel->id) }}" class="mmt-book">BOOK NOW</a>
                 </div>
+            </article>
+        @empty
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fa-solid fa-hotel"></i></div>
+                <h4>No Hotels Found</h4>
+                <p>Try adjusting your search filters or browse all locations to find your perfect stay.</p>
             </div>
-            @endforelse
-        </div>
+        @endforelse
 
         <!-- Pagination -->
         @if($hotels->hasPages())

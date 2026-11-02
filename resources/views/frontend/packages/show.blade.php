@@ -4,6 +4,17 @@
 
     @section('content')
 
+    @php
+        $bookingUnitPrice = $package->booking_price;
+        $discountPercent = $package->price > 0 && $bookingUnitPrice < $package->price
+            ? (int) round((1 - ($bookingUnitPrice / $package->price)) * 100)
+            : 0;
+        $maxTravelers = $package->max_person
+            ? min(20, max(1, (int) $package->max_person))
+            : 20;
+        $initialTravelers = min(2, $maxTravelers);
+    @endphp
+
     <section class="detail-hero">
         <div class="container">
             @php
@@ -79,9 +90,9 @@
                     <div class="detail-title-wrap">
                         <h1 class="detail-title">{{ $package->package_name }}</h1>
                         <div class="detail-badges">
-                            @if($package->discount > 0)
+                            @if($discountPercent > 0)
                             <span class="detail-badge discount">
-                                <i class="fa-solid fa-tag"></i> {{ $package->discount }}% OFF
+                                <i class="fa-solid fa-tag"></i> {{ $discountPercent }}% OFF
                             </span>
                             @endif
                             @if($package->is_best_seller)
@@ -127,16 +138,16 @@
                 <div class="detail-header-right d-none d-lg-block">
                     <div class="price-card-sticky">
                         <div class="price-display">
-                            @if($package->original_price > $package->price)
-                            <span class="original-price">₹{{ number_format($package->original_price) }}</span>
+                            @if($bookingUnitPrice < $package->price)
+                            <span class="original-price">₹{{ number_format($package->price) }}</span>
                             @endif
                             <div class="current-price">
                                 <span class="price-label">Starting from</span>
-                                <span class="price-value">₹{{ number_format($package->price) }}</span>
+                                <span class="price-value">₹{{ number_format($bookingUnitPrice) }}</span>
                                 <span class="price-per">per person</span>
                             </div>
-                            @if($package->discount > 0)
-                            <span class="save-tag">Save ₹{{ number_format($package->original_price - $package->price) }}</span>
+                            @if($bookingUnitPrice < $package->price)
+                            <span class="save-tag">Save ₹{{ number_format($package->price - $bookingUnitPrice) }}</span>
                             @endif
                         </div>
                         <button class="btn-book-now" onclick="scrollToBooking()">
@@ -518,57 +529,62 @@
                     <div class="detail-sidebar">
                         <div class="sidebar-card booking-card" id="bookingCard">
                             <h4><i class="fa-solid fa-calendar-check"></i> Book This Package</h4>
-                            <form action="" method="POST">
+                            @if ($errors->any())
+                                <div class="alert alert-danger" role="alert">
+                                    {{ $errors->first() }}
+                                </div>
+                            @endif
+                            <form action="{{ route('package.booking.start', $package) }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="package_id" value="{{ $package->id }}">
 
                                 <div class="form-group">
                                     <label><i class="fa-regular fa-calendar"></i> Travel Date</label>
-                                    <input type="date" class="form-control" name="travel_date" required min="{{ date('Y-m-d') }}">
+                                    <input type="date" class="form-control" name="travel_date" value="{{ old('travel_date') }}" required min="{{ date('Y-m-d') }}">
                                 </div>
 
                                 <div class="form-group">
                                     <label><i class="fa-solid fa-users"></i> Number of Travelers</label>
                                     <div class="traveler-counter">
-                                        <button type="button" class="counter-btn" onclick="updateTravelers(-1)">-</button>
-                                        <input type="number" name="travelers" value="2" min="1" max="20" id="travelerCount" readonly>
-                                        <button type="button" class="counter-btn" onclick="updateTravelers(1)">+</button>
+                                        <button type="button" class="counter-btn" aria-label="Remove one traveler" onclick="updateTravelers(-1)">-</button>
+                                        <input type="number" name="travelers" value="{{ old('travelers', $initialTravelers) }}" min="1" max="{{ $maxTravelers }}" id="travelerCount" readonly>
+                                        <button type="button" class="counter-btn" aria-label="Add one traveler" onclick="updateTravelers(1)">+</button>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
                                     <label><i class="fa-solid fa-user"></i> Full Name</label>
-                                    <input type="text" class="form-control" name="name" placeholder="Enter your name" required>
+                                    <input type="text" class="form-control" name="name" value="{{ old('name') }}" placeholder="Enter your name" maxlength="120" required>
                                 </div>
 
                                 <div class="form-group">
                                     <label><i class="fa-solid fa-phone"></i> Phone Number</label>
-                                    <input type="tel" class="form-control" name="phone" placeholder="+91 98765 43210" required>
+                                    <input type="tel" class="form-control" name="phone" value="{{ old('phone') }}" placeholder="+91 98765 43210" maxlength="24" required>
                                 </div>
 
                                 <div class="form-group">
                                     <label><i class="fa-solid fa-envelope"></i> Email</label>
-                                    <input type="email" class="form-control" name="email" placeholder="your@email.com" required>
+                                    <input type="email" class="form-control" name="email" value="{{ old('email') }}" placeholder="your@email.com" maxlength="255" required>
                                 </div>
 
                                 <div class="price-calc">
                                     <div class="calc-row">
                                         <span>Package Price (per person)</span>
-                                        <span>₹{{ number_format($package->price) }}</span>
+                                        <span>₹{{ number_format($bookingUnitPrice) }}</span>
                                     </div>
                                     <div class="calc-row">
                                         <span>Travelers</span>
-                                        <span id="calcTravelers">x 2</span>
+                                        <span id="calcTravelers">x {{ $initialTravelers }}</span>
                                     </div>
-                                    @if($package->discount > 0)
+                                    @if($bookingUnitPrice < $package->price)
                                     <div class="calc-row discount">
-                                        <span>Discount ({{ $package->discount }}%)</span>
-                                        <span id="calcDiscount">-₹{{ number_format(($package->price * $package->discount / 100) * 2) }}</span>
+                                        <span>You save</span>
+                                        <span id="calcDiscount">-₹{{ number_format(($package->price - $bookingUnitPrice) * $initialTravelers) }}</span>
                                     </div>
                                     @endif
                                     <div class="calc-row total">
                                         <span>Total Amount</span>
-                                        <span id="calcTotal">₹{{ number_format($package->price * 2) }}</span>
+                                        <span id="calcTotal">₹{{ number_format($bookingUnitPrice * $initialTravelers) }}</span>
                                     </div>
                                 </div>
 
@@ -659,7 +675,7 @@
     <div class="mobile-booking-bar d-lg-none">
         <div class="mobile-price">
             <span class="mobile-label">Starting from</span>
-            <span class="mobile-value">₹{{ number_format($package->price) }}</span>
+            <span class="mobile-value">₹{{ number_format($bookingUnitPrice) }}</span>
             <span class="mobile-per">/person</span>
         </div>
         <button class="btn-mobile-book" onclick="scrollToBooking()">
@@ -682,17 +698,17 @@
     <script>
     // ===== GALLERY =====
     let currentImageIndex = 0;
-    let galleryImages = [];
+    let detailGalleryImages = [];
 
     // Collect all images from the page
     document.querySelectorAll('.thumb-item img').forEach(img => {
-        galleryImages.push(img.src);
+        detailGalleryImages.push(img.src);
     });
 
     // If no thumbs, use main image only
-    if(galleryImages.length === 0) {
+    if(detailGalleryImages.length === 0) {
         const mainImg = document.getElementById('mainGalleryImage');
-        if(mainImg) galleryImages.push(mainImg.src);
+        if(mainImg) detailGalleryImages.push(mainImg.src);
     }
 
     function setMainImage(src, thumb) {
@@ -703,7 +719,7 @@
     }
 
     function changeMainImage(direction) {
-        if(galleryImages.length <= 1) return;
+        if(detailGalleryImages.length <= 1) return;
         const thumbs = document.querySelectorAll('.thumb-item');
         let active = 0;
         thumbs.forEach((t, i) => { if(t.classList.contains('active')) active = i; });
@@ -713,19 +729,19 @@
 
     // ===== LIGHTBOX =====
     function openLightbox() {
-        if(galleryImages.length === 0) return;
+        if(detailGalleryImages.length === 0) return;
         const lightbox = document.getElementById('lightbox');
         const mainImg = document.getElementById('mainGalleryImage');
-        currentImageIndex = galleryImages.indexOf(mainImg?.src) || 0;
+        currentImageIndex = detailGalleryImages.indexOf(mainImg?.src) || 0;
         if(currentImageIndex < 0) currentImageIndex = 0;
 
         const lbImg = document.getElementById('lightboxImage');
-        if(lbImg) lbImg.src = galleryImages[currentImageIndex];
+        if(lbImg) lbImg.src = detailGalleryImages[currentImageIndex];
 
         const curr = document.getElementById('lightboxCurrent');
         const total = document.getElementById('lightboxTotal');
         if(curr) curr.textContent = currentImageIndex + 1;
-        if(total) total.textContent = galleryImages.length;
+        if(total) total.textContent = detailGalleryImages.length;
 
         lightbox.classList.add('show');
         document.body.style.overflow = 'hidden';
@@ -737,10 +753,10 @@
     }
 
     function lightboxNav(direction) {
-        if(galleryImages.length <= 1) return;
-        currentImageIndex = (currentImageIndex + direction + galleryImages.length) % galleryImages.length;
+        if(detailGalleryImages.length <= 1) return;
+        currentImageIndex = (currentImageIndex + direction + detailGalleryImages.length) % detailGalleryImages.length;
         const lbImg = document.getElementById('lightboxImage');
-        if(lbImg) lbImg.src = galleryImages[currentImageIndex];
+        if(lbImg) lbImg.src = detailGalleryImages[currentImageIndex];
         const curr = document.getElementById('lightboxCurrent');
         if(curr) curr.textContent = currentImageIndex + 1;
     }
@@ -809,15 +825,14 @@
         const calcTravelers = document.getElementById('calcTravelers');
         if(calcTravelers) calcTravelers.textContent = 'x ' + val;
 
-        const price = {{ $package->price }};
-        const discount = {{ $package->discount ?? 0 }};
+        const price = {{ $bookingUnitPrice }};
+        const savingsPerTraveler = {{ max(0, $package->price - $bookingUnitPrice) }};
         let total = price * val;
 
-        if(discount > 0) {
-            const discAmount = (price * discount / 100) * val;
+        if(savingsPerTraveler > 0) {
+            const discAmount = savingsPerTraveler * val;
             const calcDiscount = document.getElementById('calcDiscount');
             if(calcDiscount) calcDiscount.textContent = '-₹' + discAmount.toLocaleString('en-IN');
-            total -= discAmount;
         }
 
         const calcTotal = document.getElementById('calcTotal');

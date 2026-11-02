@@ -1,6 +1,8 @@
 // Add scrolled class on scroll
 window.addEventListener('scroll', function() {
     const header = document.querySelector('.site-header');
+    if (!header) return;
+
     if (window.scrollY > 10) {
         header.classList.add('scrolled');
     } else {
@@ -43,11 +45,11 @@ window.addEventListener('scroll', function() {
     });
 
     function showLoader() {
-        document.getElementById('lightboxLoader').classList.add('active');
+        document.getElementById('lightboxLoader')?.classList.add('active');
     }
 
     function hideLoader() {
-        document.getElementById('lightboxLoader').classList.remove('active');
+        document.getElementById('lightboxLoader')?.classList.remove('active');
     }
 
     function openLightbox(index) {
@@ -57,6 +59,7 @@ window.addEventListener('scroll', function() {
         const lightbox = document.getElementById('lightbox');
         const img = document.getElementById('lightboxImg');
         const counter = document.getElementById('lightboxCounter');
+        if (!lightbox || !img || !counter) return;
 
         showLoader();
         img.style.opacity = '0';
@@ -79,11 +82,14 @@ window.addEventListener('scroll', function() {
 
     function closeLightbox() {
         const lightbox = document.getElementById('lightbox');
+        if (!lightbox) return;
+
         lightbox.classList.remove('active');
         document.body.style.overflow = '';
 
         setTimeout(function() {
-            document.getElementById('lightboxImg').src = '';
+            const img = document.getElementById('lightboxImg');
+            if (img) img.src = '';
         }, 400);
     }
 
@@ -95,6 +101,8 @@ window.addEventListener('scroll', function() {
         if (currentIndex >= galleryImages.length) currentIndex = 0;
 
         const img = document.getElementById('lightboxImg');
+        const counter = document.getElementById('lightboxCounter');
+        if (!img || !counter) return;
 
         showLoader();
         img.style.opacity = '0';
@@ -110,7 +118,7 @@ window.addEventListener('scroll', function() {
             hideLoader();
         };
 
-        document.getElementById('lightboxCounter').textContent = (currentIndex + 1) + ' / ' + galleryImages.length;
+        counter.textContent = (currentIndex + 1) + ' / ' + galleryImages.length;
     }
 
     function downloadImage() {
@@ -133,7 +141,7 @@ window.addEventListener('scroll', function() {
 
     document.addEventListener('keydown', function(e) {
         const lightbox = document.getElementById('lightbox');
-        if (!lightbox.classList.contains('active')) return;
+        if (!lightbox || !lightbox.classList.contains('active')) return;
 
         if (e.key === 'Escape') closeLightbox();
         if (e.key === 'ArrowLeft') changeImage(-1);
@@ -144,12 +152,14 @@ window.addEventListener('scroll', function() {
     let touchEndX = 0;
 
     document.addEventListener('touchstart', function(e) {
-        if (!document.getElementById('lightbox').classList.contains('active')) return;
+        const lightbox = document.getElementById('lightbox');
+        if (!lightbox || !lightbox.classList.contains('active')) return;
         touchStartX = e.changedTouches[0].screenX;
     });
 
     document.addEventListener('touchend', function(e) {
-        if (!document.getElementById('lightbox').classList.contains('active')) return;
+        const lightbox = document.getElementById('lightbox');
+        if (!lightbox || !lightbox.classList.contains('active')) return;
         touchEndX = e.changedTouches[0].screenX;
         handleSwipe();
     });
@@ -163,4 +173,3 @@ window.addEventListener('scroll', function() {
 
 
     // show package details modal
-

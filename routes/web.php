@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Frontend\BookingPaymentController;
 
 
 Route::get('/', function () {
@@ -30,6 +31,13 @@ Route::get('/packages',[HomeController::class,'packages'])->name('packages');
 
 Route::get('/package/{id}', [HomeController::class,'packageDetails'])
     ->name('package.details');
+
+Route::post('/hotel/{hotel}/book', [BookingPaymentController::class, 'startHotel'])
+    ->name('hotel.booking.start');
+Route::post('/package/{package}/book', [BookingPaymentController::class, 'startPackage'])
+    ->name('package.booking.start');
+Route::post('/payments/{payment}/verify', [BookingPaymentController::class, 'verify'])
+    ->name('payments.verify');
 
 Route::get('/gallery',[HomeController::class,'gallery'])->name('gallery');
 

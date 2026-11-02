@@ -26,21 +26,29 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $totalBookings = Booking::count();
+        $totalBookings = Booking::where('user_id', $user->id)->count();
 
-        $activeBookings = 0;
+        $activeBookings = Booking::where('user_id', $user->id)
+            ->where('booking_status', 'confirmed')
+            ->count();
 
-        $totalPackages = BookingPackage::count();
+        $totalPackages = BookingPackage::whereHas('booking', function ($query) use ($user): void {
+            $query->where('user_id', $user->id);
+        })->count();
 
         $totalReviews = Review::count();
 
         $totalPayments = 0;
 
-        $recentBookings = Booking::latest()
+        $recentBookings = Booking::where('user_id', $user->id)
+            ->latest()
             ->take(5)
             ->get();
 
-        $recentPackages = BookingPackage::latest()
+        $recentPackages = BookingPackage::whereHas('booking', function ($query) use ($user): void {
+            $query->where('user_id', $user->id);
+        })
+            ->latest()
             ->take(5)
             ->get();
 
@@ -64,7 +72,8 @@ class DashboardController extends Controller
 
     public function bookings()
     {
-        $bookings = Booking::latest()
+        $bookings = Auth::user()->bookings()
+            ->latest()
             ->paginate(10);
 
         return view('user.bookings.index', compact('bookings'));
@@ -78,7 +87,7 @@ class DashboardController extends Controller
 
     public function bookingShow($id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Auth::user()->bookings()->findOrFail($id);
 
         return view('user.bookings.show', compact('booking'));
     }

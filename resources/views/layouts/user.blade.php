@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="{{ asset('user/css/dashboard.css') }}">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    @unless (request()->routeIs('user.dashboard'))
+        <link rel="stylesheet" href="{{ asset('frontend/css/premium.css') }}">
+    @endunless
 </head>
 
 <body>
