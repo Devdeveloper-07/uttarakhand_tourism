@@ -29,15 +29,15 @@
     <!-- Main Footer -->
     <div class="footer-main">
         <div class="container">
-            <div class="row g-5">
+            <div class="row g-4 g-lg-5">
                 <!-- Brand Column -->
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-brand">
                         <a href="{{ route('home') }}" class="footer-logo">
-                            <img src="{{ asset('assets/logo/logo.png') }}" alt="Uttarakhand Tourism Logo">
+                            <img src="{{ asset('assets/logo/logo.png') }}" alt="Uttarakhand Travels logo">
                             <div class="footer-logo-text">
                                 <span>Uttarakhand</span>
-                                <small>Tourism</small>
+                                <small>Travels</small>
                             </div>
                         </a>
                         <p class="footer-desc">
@@ -183,7 +183,7 @@
             <div class="footer-bottom-inner">
                 <div class="copyright">
                     <i class="fa-solid fa-copyright"></i>
-                    {{ date('Y') }} Uttarakhand Tourism. All Rights Reserved.
+                    {{ date('Y') }} Uttarakhand Travels. All Rights Reserved.
                 </div>
                 <div class="footer-bottom-links">
                     <a href="#">Privacy Policy</a>

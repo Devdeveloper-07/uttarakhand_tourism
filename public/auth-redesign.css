@@ -1,0 +1,19 @@
+﻿.auth-page{min-height:100vh;overflow:auto;background:linear-gradient(135deg,#eaf0f6,#f8fafc 55%,#e7edf3);font-family:Inter,"Segoe UI",sans-serif}
+.auth-page .login-card,.auth-page .wizard-card{border:1px solid rgba(255,255,255,.8);border-radius:22px;box-shadow:0 26px 80px rgba(20,43,66,.16)}
+.auth-page .form-side{padding:clamp(28px,5vw,56px)}
+.auth-page .info-side{background:linear-gradient(145deg,#102e4b,#17629e 70%,#3487a1)}
+.auth-page h1,.auth-page h2,.auth-page h3{color:#17344e;letter-spacing:-.035em}
+.auth-page .form-control{min-height:46px;border-color:#dce5ef;border-radius:10px}
+.auth-page .form-control:focus{border-color:#7aabd9;box-shadow:0 0 0 4px rgba(23,104,210,.1)}
+.auth-page .btn-primary{border-color:#1768d2;border-radius:10px;background:#1768d2;font-weight:650}
+@media(max-width:600px){.auth-page .login-card,.auth-page .wizard-card{width:100%;height:auto;max-height:none}.auth-page .info-side{min-height:220px}}
+
+.account-page { min-height:100vh; background:#f3f6fa; color:#20364a; font-family:Inter,"Segoe UI",sans-serif; }
+.account-page .min-h-screen { background:#f3f6fa!important; }
+.account-page nav { border-bottom:1px solid #e2e8f0; background:#fff!important; box-shadow:0 4px 18px rgba(23,43,64,.045); }
+.account-page main { padding:28px 16px; }
+.account-page main > div { max-width:1120px; margin-inline:auto; }
+.account-page main .bg-white { border:1px solid #e2e8f0; border-radius:16px; box-shadow:0 8px 26px rgba(23,43,64,.055); }
+.account-page input,.account-page select { border-color:#dce4ec!important; border-radius:9px!important; }
+.account-page input:focus,.account-page select:focus { border-color:#75a5d4!important; box-shadow:0 0 0 3px rgba(37,99,166,.11)!important; }
+.account-page button[type=submit] { border-radius:9px; background:#2563a6; }

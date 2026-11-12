@@ -1,211 +1,86 @@
 @extends('layouts.user')
 
-@section('title','My Packages')
+@section('title', 'My Package Bookings')
 
 @section('content')
-
-<div class="dashboard-container">
-
     <div class="page-header">
-
         <div>
-
-            <h2 class="page-title">
-
-                My Packages
-
-            </h2>
-
-            <p class="page-subtitle">
-
-                View your booked tour packages.
-
-            </p>
-
+            <h1 class="page-title">My Package Bookings</h1>
+            <p class="page-subtitle">Your booked tours and their travel details.</p>
         </div>
-
     </div>
 
-    @if(session('success'))
-
-        <div class="alert alert-success">
-
-            {{ session('success') }}
-
-        </div>
-
-    @endif
-
-    <div class="content-card">
-
+    <section class="content-card">
         <div class="card-header-custom">
-
-            <h5>
-
-                <i class="fa-solid fa-suitcase"></i>
-
-                Package List
-
-            </h5>
-
+            <h2 class="h5 mb-0"><i class="fa-solid fa-suitcase-rolling me-2"></i>Tour reservations</h2>
+            <span class="text-muted small">{{ $bookings->total() }} total</span>
         </div>
-
-        <div class="card-body-custom">
-
-            <div class="table-responsive">
-
-                <table class="table table-hover align-middle">
-
-                    <thead class="table-dark">
-
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Destination</th>
+                        <th>Travel date</th>
+                        <th>Travelers</th>
+                        <th>Booking status</th>
+                        <th>Total</th>
+                        <th><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($bookings as $booking)
+                        @php
+                            $package = $booking->item;
+                            $statusClass = match (strtolower((string) $booking->booking_status)) {
+                                'confirmed', 'completed' => 'text-bg-success',
+                                'pending' => 'text-bg-warning',
+                                'cancelled', 'failed' => 'text-bg-danger',
+                                default => 'text-bg-secondary',
+                            };
+                        @endphp
                         <tr>
-
-                            <th>#</th>
-
-                            <th>Image</th>
-
-                            <th>Package</th>
-
-                            <th>Duration</th>
-
-                            <th>Price</th>
-
-                            <th>Status</th>
-
-                            <th width="120">
-
-                                Action
-
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @forelse($packages as $package)
-
-                        <tr>
-
                             <td>
-
-                                {{ $loop->iteration }}
-
-                            </td>
-
-                            <td width="90">
-
-                                @if($package->featured_image)
-
-                                    <img src="{{ asset('uploads/packages/'.$package->featured_image) }}"
-                                         width="70"
-                                         height="70"
-                                         class="rounded shadow"
-                                         style="object-fit:cover;">
-
-                                @else
-
-                                    <img src="https://via.placeholder.com/70"
-                                         class="rounded shadow">
-
-                                @endif
-
-                            </td>
-
-                            <td>
-
-                                {{ $package->package_name }}
-
-                            </td>
-
-                            <td>
-
-                                {{ $package->duration ?? '-' }}
-
-                            </td>
-
-                            <td>
-
-                                ₹{{ number_format($package->price) }}
-
-                            </td>
-
-                            <td>
-
-                                @if($package->status)
-
-                                    <span class="badge bg-success">
-
-                                        Active
-
-                                    </span>
-
-                                @else
-
-                                    <span class="badge bg-danger">
-
-                                        Inactive
-
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-                            <td>
-
-                                <a href="{{ route('user.packages.show',$package->id) }}"
-                                   class="btn btn-info btn-sm">
-
-                                    <i class="fa-solid fa-eye"></i>
-
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-                        @empty
-
-                        <tr>
-
-                            <td colspan="7">
-
-                                <div class="text-center py-5">
-
-                                    <i class="fa-solid fa-box-open fa-3x text-secondary"></i>
-
-                                    <h5 class="mt-3">
-
-                                        No Packages Found
-
-                                    </h5>
-
+                                <div class="d-flex align-items-center gap-3">
+                                    @if ($package?->thumbnail)
+                                        <img src="{{ asset('uploads/packages/'.$package->thumbnail) }}" class="table-item-image" alt="{{ $package->package_name }}">
+                                    @else
+                                        <span class="table-item-placeholder"><i class="fa-solid fa-suitcase-rolling"></i></span>
+                                    @endif
+                                    <div>
+                                        <div class="fw-semibold">{{ $package?->package_name ?? 'Package listing unavailable' }}</div>
+                                        <div class="small text-muted">{{ $booking->booking_no ?: 'Booking #'.$booking->id }}</div>
+                                    </div>
                                 </div>
-
                             </td>
-
+                            <td>{{ $package?->destination ?? '—' }}</td>
+                            <td>{{ $booking->travel_date?->format('d M Y') ?? '—' }}</td>
+                            <td>{{ $booking->guest ?? '—' }}</td>
+                            <td><span class="badge rounded-pill {{ $statusClass }}">{{ str()->headline($booking->booking_status ?: 'Unknown') }}</span></td>
+                            <td class="text-nowrap">{{ $booking->currency ?: 'INR' }} {{ number_format((float) ($booking->grand_total ?? $booking->total_amount ?? 0), 2) }}</td>
+                            <td class="text-end">
+                                <a href="{{ route('user.packages.show', $booking->id) }}" class="btn btn-sm btn-outline-primary" aria-label="View package booking">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </td>
                         </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-            <div class="mt-4">
-
-                {{ $packages->links() }}
-
-            </div>
-
+                    @empty
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state my-3">
+                                    <i class="fa-solid fa-suitcase-rolling fa-2x"></i>
+                                    <h2 class="h5">No package bookings yet</h2>
+                                    <p>Your tour reservations will appear here after you book a package.</p>
+                                    <a href="{{ route('packages') }}" class="btn btn-primary mt-2">Explore packages</a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
-    </div>
-
-</div>
-
+        @if ($bookings->hasPages())
+            <div class="p-3">{{ $bookings->links() }}</div>
+        @endif
+    </section>
 @endsection

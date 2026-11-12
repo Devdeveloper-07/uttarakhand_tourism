@@ -6,7 +6,7 @@
 
 <section class="mmt-home-hero">
     <div class="container">
-        <h1>Book Hotels, Holiday Packages & more</h1>
+        <div class="home-eyebrow"><span></span> UTTARAKHAND, AT YOUR PACE</div><h1>Your Himalayan escape<br><em>starts here.</em></h1>
         <p class="lead-copy">Find stays and Himalayan holiday packages across Uttarakhand — Nainital, Rishikesh, Mussoorie, Kedarnath and more.</p>
 
         <div class="mmt-search-card">
@@ -107,11 +107,55 @@
     </div>
 </section>
 
-<section class="mmt-section">
+<section class="home-destinations-section">
+    <div class="container">
+        <div class="home-destinations-heading">
+            <div>
+                <span class="home-section-kicker">A FEW PLACES TO BEGIN</span>
+                <h2>Find your kind of mountains</h2>
+                <p>Choose a destination and explore available trips.</p>
+            </div>
+            <a href="{{ route('packages') }}" class="mmt-link">ALL PACKAGES</a>
+        </div>
+        <div class="row g-3">
+            @foreach($destinations->take(4) as $destination)
+                @if($destination)
+                    @php
+                        $destinationText = \Illuminate\Support\Str::lower($destination);
+                        $destinationPackage = $featuredPackages->first(function ($package) use ($destinationText) {
+                            $packageDestination = \Illuminate\Support\Str::lower($package->destination ?? '');
+
+                            return $package->thumbnail
+                                && $packageDestination !== ''
+                                && (
+                                    \Illuminate\Support\Str::contains($destinationText, $packageDestination)
+                                    || \Illuminate\Support\Str::contains($packageDestination, $destinationText)
+                                );
+                        }) ?? $featuredPackages->first(fn ($package) => $package->thumbnail);
+                    @endphp
+                    <div class="col-6 col-md-3">
+                        <a class="home-destination-card" href="{{ route('packages', ['destination' => $destination]) }}">
+                            <span class="home-destination-art">
+                                @if($destinationPackage?->thumbnail)
+                                    <img src="{{ asset('uploads/packages/' . $destinationPackage->thumbnail) }}" alt="" aria-hidden="true" loading="lazy">
+                                @else
+                                    <i class="fa-solid fa-mountain-sun" aria-hidden="true"></i>
+                                @endif
+                            </span>
+                            <span class="home-destination-name">{{ $destination }}</span>
+                            <span class="home-destination-link">Explore trips <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+                        </a>
+                    </div>
+                @endif
+            @endforeach
+        </div>
+    </div>
+</section>
+<section class="mmt-section home-hotels-section">
     <div class="container">
         <div class="mmt-section-head">
             <div>
-                <h2>Hotels in Uttarakhand</h2>
+                <span class="home-section-kicker">STAYS WORTH THE JOURNEY</span><h2>Find your place in the hills</h2>
                 <p>Compare stays, ratings and starting prices</p>
             </div>
             <a href="{{ route('hotels') }}" class="mmt-link">VIEW ALL</a>
@@ -155,7 +199,7 @@
     </div>
 </section>
 
-<section class="mmt-section" style="background:#fff;">
+<section class="mmt-section home-packages-section">
     <div class="container">
         <div class="mmt-section-head">
             <div>
@@ -331,16 +375,6 @@
 </section>
 
 <script>
-    document.querySelectorAll('.mmt-search-tab').forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            document.querySelectorAll('.mmt-search-tab').forEach(function (t) { t.classList.remove('active'); });
-            document.querySelectorAll('.mmt-search-body').forEach(function (b) { b.classList.remove('active'); });
-            tab.classList.add('active');
-            var id = tab.dataset.tab === 'holidays' ? 'mmtHolidaySearch' : 'mmtHotelSearch';
-            document.getElementById(id).classList.add('active');
-        });
-    });
-
     function animateCounter(el) {
         const target = parseFloat(el.getAttribute('data-count'));
         const duration = 1400;

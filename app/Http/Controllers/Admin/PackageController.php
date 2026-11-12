@@ -25,12 +25,13 @@ class PackageController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'package_name'     => 'required|max:255',
             'destination'      => 'required|max:255',
             'duration'         => 'required|integer',
             'price'            => 'required|numeric',
             'discount_price'   => 'nullable|numeric',
+            'gst_category'     => 'required|in:tour_operator_eligible,tour_operator_with_itc',
             'max_person'       => 'required|integer',
             'thumbnail'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'description'      => 'required',
@@ -54,12 +55,14 @@ class PackageController extends Controller
 
         Package::create([
 
-            'package_name'    => $request->package_name,
-            'destination'     => $request->destination,
-            'duration'        => $request->duration,
-            'price'           => $request->price,
-            'discount_price'  => $request->discount_price,
-            'max_person'      => $request->max_person,
+            'package_name'    => $validated['package_name'],
+            'destination'     => $validated['destination'],
+            'duration'        => $validated['duration'],
+            'price'           => $validated['price'],
+            'discount_price'  => $validated['discount_price'] ?? null,
+            'gst_category'    => $validated['gst_category'],
+            'gst_percentage'  => $this->rateForCategory($validated['gst_category']),
+            'max_person'      => $validated['max_person'],
             'thumbnail'       => $imageName,
             'description'     => $request->description,
             'includes'        => $request->includes,
@@ -88,12 +91,13 @@ class PackageController extends Controller
 
     public function update(Request $request, Package $package)
     {
-        $request->validate([
+        $validated = $request->validate([
             'package_name'     => 'required|max:255',
             'destination'      => 'required|max:255',
             'duration'         => 'required|integer',
             'price'            => 'required|numeric',
             'discount_price'   => 'nullable|numeric',
+            'gst_category'     => 'required|in:tour_operator_eligible,tour_operator_with_itc',
             'max_person'       => 'required|integer',
             'thumbnail'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'description'      => 'required',
@@ -123,12 +127,14 @@ class PackageController extends Controller
 
         $package->update([
 
-            'package_name'    => $request->package_name,
-            'destination'     => $request->destination,
-            'duration'        => $request->duration,
-            'price'           => $request->price,
-            'discount_price'  => $request->discount_price,
-            'max_person'      => $request->max_person,
+            'package_name'    => $validated['package_name'],
+            'destination'     => $validated['destination'],
+            'duration'        => $validated['duration'],
+            'price'           => $validated['price'],
+            'discount_price'  => $validated['discount_price'] ?? null,
+            'gst_category'    => $validated['gst_category'],
+            'gst_percentage'  => $this->rateForCategory($validated['gst_category']),
+            'max_person'      => $validated['max_person'],
             'thumbnail'       => $imageName,
             'description'     => $request->description,
             'includes'        => $request->includes,
@@ -157,5 +163,13 @@ class PackageController extends Controller
         return redirect()
             ->route('admin.packages.index')
             ->with('success', 'Package Deleted Successfully.');
+    }
+
+    private function rateForCategory(string $category): int
+    {
+        return match ($category) {
+            'tour_operator_eligible' => 5,
+            'tour_operator_with_itc' => 18,
+        };
     }
 }

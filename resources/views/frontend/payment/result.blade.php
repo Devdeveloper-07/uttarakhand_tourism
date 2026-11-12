@@ -30,6 +30,11 @@
                 </div>
 
                 @if ($isSuccess)
+                    @if ($invoiceUrl)
+                        <a class="btn btn-outline-primary w-100 mb-2" href="{{ $invoiceUrl }}">
+                            <i class="fa-solid fa-file-invoice me-1"></i> View / print invoice
+                        </a>
+                    @endif
                     <a class="btn-book-submit text-decoration-none" href="{{ route('home') }}">Continue exploring</a>
                 @else
                     <a class="btn-book-submit text-decoration-none" href="{{ $detailsUrl }}">Return to trip</a>

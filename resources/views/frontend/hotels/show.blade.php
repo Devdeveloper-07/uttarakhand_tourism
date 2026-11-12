@@ -2,10 +2,11 @@
 
 @section('title', $hotel->hotel_name)
 
-@section('content')
+@push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+@endpush
 
-{{-- Leaflet CSS --}}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+@section('content')
 
 {{-- ===================== HERO / SINGLE IMAGE ===================== --}}
 <section class="mmt-hero" id="mmtHero">
@@ -412,7 +413,7 @@
                                 <span class="mmt-price-currency" id="mmtPriceCurrency">₹</span>
                                 <span class="mmt-price-value" id="mmtPriceValue">{{ number_format($hotel->starting_price ?? $hotel->price ?? 0) }}</span>
                             </div>
-                            <span class="mmt-price-unit" id="mmtPriceUnit">+ taxes & fees per night</span>
+                            <span class="mmt-price-unit" id="mmtPriceUnit">per room / night · GST by tariff slab</span>
                         </div>
                         <div class="mmt-price-guarantee" id="mmtPriceGuarantee">
                             <i class="fa-solid fa-tag" id="mmtPriceGuaranteeIcon"></i>
@@ -431,6 +432,7 @@
                         @endif
                         <form id="mmtBookingForm" class="mmt-booking-form" method="POST" action="{{ route('hotel.booking.start', $hotel) }}">
                             @csrf
+                            <input type="hidden" name="checkout_token" value="{{ session('new_checkout_token', old('checkout_token', (string) \Illuminate\Support\Str::uuid())) }}">
                             <div class="mmt-form-row" id="mmtFormRow">
                                 <div class="mmt-form-group" id="mmtFormGroupCheckin">
                                     <label for="mmtCheckinDate" id="mmtLabelCheckin">
@@ -465,20 +467,48 @@
                                 </div>
                             </div>
 
-                            <div class="mmt-form-group" id="mmtFormGroupRooms">
-                                <label for="mmtRoomSelect" id="mmtLabelRooms">
-                                    <i class="fa-solid fa-bed" id="mmtIconRooms"></i> Rooms
-                                </label>
-                                <div class="mmt-input-box" id="mmtInputBoxRooms">
-                                    <select id="mmtRoomSelect" name="rooms" required>
-                                        <option value="" disabled {{ old('rooms') ? '' : 'selected' }}>Select rooms</option>
-                                        @foreach (range(1, 4) as $roomCount)
-                                            <option value="{{ $roomCount }}" {{ old('rooms') == $roomCount ? 'selected' : '' }}>{{ $roomCount.' '.($roomCount === 1 ? 'Room' : 'Rooms') }}</option>
+                            @if ($hotel->rooms->isNotEmpty())
+                                <div class="mmt-form-group">
+                                    <label><i class="fa-solid fa-bed"></i> Select rooms (up to 4)</label>
+                                    <div class="d-grid gap-2">
+                                        @foreach ($hotel->rooms as $room)
+                                            <label class="d-flex align-items-center justify-content-between gap-3 border rounded-3 bg-white p-3">
+                                                <span>
+                                                    <strong class="d-block">{{ $room->room_name }}</strong>
+                                                    <small class="text-muted">
+                                                        {{ $room->roomType?->name ?? 'Room' }} · Sleeps {{ $room->capacity }} ·
+                                                        ₹{{ number_format((float) $room->price_per_night, 2) }} / night ·
+                                                        {{ $room->available_rooms }} available
+                                                    </small>
+                                                </span>
+                                                <input class="form-control" style="width: 84px" type="number"
+                                                    name="room_allocations[{{ $room->id }}]" min="0"
+                                                    max="{{ min(4, $room->available_rooms) }}"
+                                                    value="{{ old("room_allocations.{$room->id}", 0) }}"
+                                                    aria-label="Quantity of {{ $room->room_name }}">
+                                            </label>
                                         @endforeach
-                                    </select>
-                                    <i class="fa-solid fa-chevron-down mmt-select-arrow" id="mmtRoomSelectArrow"></i>
+                                    </div>
                                 </div>
-                            </div>
+                            @elseif ($hasRoomInventory)
+                                <div class="alert alert-warning">No rooms are currently available at this hotel.</div>
+                            @else
+                                <div class="mmt-form-group" id="mmtFormGroupRooms">
+                                    <label for="mmtRoomSelect" id="mmtLabelRooms">
+                                        <i class="fa-solid fa-bed" id="mmtIconRooms"></i> Rooms
+                                    </label>
+                                    <div class="mmt-input-box" id="mmtInputBoxRooms">
+                                        <select id="mmtRoomSelect" name="rooms" required>
+                                            @foreach (range(1, 4) as $roomCount)
+                                                <option value="{{ $roomCount }}" {{ old('rooms', 1) == $roomCount ? 'selected' : '' }}>
+                                                    {{ $roomCount.' '.($roomCount === 1 ? 'Room' : 'Rooms') }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <i class="fa-solid fa-chevron-down mmt-select-arrow" id="mmtRoomSelectArrow"></i>
+                                    </div>
+                                </div>
+                            @endif
 
                             <div class="mmt-form-group" id="mmtFormGroupName">
                                 <label for="mmtGuestName"><i class="fa-solid fa-user"></i> Full Name</label>

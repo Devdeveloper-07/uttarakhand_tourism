@@ -10,7 +10,7 @@
     <div class="page-header">
         <div>
             <h2 class="page-title">Hotel Management</h2>
-            <p class="page-subtitle">Manage all hotels in Uttarakhand Tourism</p>
+            <p class="page-subtitle">Manage all hotels in Uttarakhand Travels</p>
         </div>
         <div class="page-actions">
             <a href="{{ route('admin.hotels.create') }}" class="btn btn-primary btn-sm">

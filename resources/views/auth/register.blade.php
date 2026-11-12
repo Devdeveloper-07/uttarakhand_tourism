@@ -305,21 +305,21 @@
 
                 <!-- Login Link -->
                 <div class="text-center mt-2">
-                    <span style="font-size: 0.8rem; color: #6c757d;">Already Registered? </span>
+                    <span class="signup-note">Already Registered? </span>
                     <a href="{{ route('login') }}" class="link-signup">Log in</a>
                 </div>
             </div>
 
             <!-- Right Side: Info Panel -->
             <div class="col-lg-6 info-side">
-                <div class="position-relative" style="z-index: 1;">
+                <div class="info-panel-content">
 
                     <!-- Brand Name -->
-                    <h1 class="brand-name">Create Your Hotel Admin Account</h1>
+                    <h1 class="brand-name">Your next journey starts here</h1>
 
                     <!-- Description -->
                     <p class="brand-desc">
-                        Your complete solution for hotel administration. Easily manage bookings, rooms, packages, galleries, testimonials, and customer information with a fast, secure, and intuitive dashboard.
+                        Create an account to save your details and make planning a Uttarakhand getaway simpler.
                     </p>
 
                     <!-- Features -->

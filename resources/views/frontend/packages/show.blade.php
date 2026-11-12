@@ -536,6 +536,7 @@
                             @endif
                             <form action="{{ route('package.booking.start', $package) }}" method="POST">
                                 @csrf
+                                <input type="hidden" name="checkout_token" value="{{ session('new_checkout_token', old('checkout_token', (string) \Illuminate\Support\Str::uuid())) }}">
                                 <input type="hidden" name="package_id" value="{{ $package->id }}">
 
                                 <div class="form-group">

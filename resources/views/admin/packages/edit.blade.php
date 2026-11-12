@@ -109,6 +109,23 @@
                         </div>
                     </div>
 
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fa-solid fa-percent text-primary"></i> GST category and rate <span class="text-danger">*</span>
+                            </label>
+                            <select name="gst_category" class="form-select modern-input" required>
+                                <option value="tour_operator_eligible" @selected(old('gst_category', $package->gst_category) === 'tour_operator_eligible')>
+                                    Eligible tour operator service, prescribed conditions — 5%
+                                </option>
+                                <option value="tour_operator_with_itc" @selected(old('gst_category', $package->gst_category) === 'tour_operator_with_itc')>
+                                    Tour operator service with applicable ITC — 18%
+                                </option>
+                            </select>
+                            <small class="form-hint">Select the classification applicable to this package. The rate is stored with each booking.</small>
+                        </div>
+                    </div>
+
                     <!-- Max Persons -->
                     <div class="col-md-6">
                         <div class="form-group">

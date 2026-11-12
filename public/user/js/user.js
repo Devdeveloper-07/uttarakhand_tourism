@@ -2,31 +2,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Sidebar Toggle
     const menuToggle = document.getElementById('menu-toggle');
-    const wrapper = document.querySelector('.wrapper');
+    const wrapper = document.querySelector('.user-dashboard .wrapper');
+    const sidebar = document.getElementById('userSidebar');
+    const mobileLayout = window.matchMedia('(max-width: 991.98px)');
 
-    if (menuToggle && wrapper) {
+    if (menuToggle && wrapper && sidebar) {
+        const syncSidebar = () => {
+            menuToggle.setAttribute('aria-expanded', String(
+                mobileLayout.matches
+                    ? sidebar.classList.contains('active')
+                    : !wrapper.classList.contains('sidebar-collapsed')
+            ));
+        };
+
         menuToggle.addEventListener('click', function() {
-            wrapper.classList.toggle('sidebar-collapsed');
-
-            // Save state to localStorage
-            const isCollapsed = wrapper.classList.contains('sidebar-collapsed');
-            localStorage.setItem('userSidebarCollapsed', isCollapsed);
+            if (mobileLayout.matches) {
+                sidebar.classList.toggle('active');
+            } else {
+                wrapper.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('userSidebarCollapsed', wrapper.classList.contains('sidebar-collapsed'));
+            }
+            syncSidebar();
         });
 
-        // Restore state
-        const savedState = localStorage.getItem('userSidebarCollapsed');
-        if (savedState === 'true') {
+        if (!mobileLayout.matches && localStorage.getItem('userSidebarCollapsed') === 'true') {
             wrapper.classList.add('sidebar-collapsed');
         }
-    }
 
-    // Mobile Sidebar Toggle
-    const sidebar = document.querySelector('.user-sidebar');
-
-    if (window.innerWidth < 992) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
+        mobileLayout.addEventListener('change', function(event) {
+            sidebar.classList.remove('active');
+            wrapper.classList.toggle('sidebar-collapsed', !event.matches && localStorage.getItem('userSidebarCollapsed') === 'true');
+            syncSidebar();
         });
+        syncSidebar();
     }
 
     // Active Nav Item

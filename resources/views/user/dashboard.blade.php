@@ -13,11 +13,11 @@
                     Welcome, {{ auth()->user()->name }} 👋
                 </h2>
                 <p class="page-subtitle">
-                    Manage your bookings, profile and explore Uttarakhand Tourism.
+                    Manage your bookings, profile and explore Uttarakhand Travels.
                 </p>
             </div>
             <div class="page-actions">
-                <a href="#" class="btn btn-primary">
+                <a href="{{ route('hotels') }}" class="btn btn-primary">
                     <i class="fa-solid fa-hotel"></i>
                     Explore Hotels
                 </a>
@@ -104,7 +104,7 @@
                     </p>
                 </div>
                 <div class="col-lg-4 text-end">
-                    <a href="#" class="btn btn-light">
+                    <a href="{{ route('packages') }}" class="btn btn-light">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         Explore Now
                     </a>
@@ -134,13 +134,13 @@
                                 </div>
                                 <div class="booking-details">
                                     <h6>
-                                        {{ $package->package_name ?? 'Tour Package' }}
+                                        {{ $package->package?->package_name ?? 'Tour Package' }}
                                     </h6>
                                     <p>
-                                        Booking ID : #{{ $package->id }}
+                                        Booking ID : {{ $package->booking?->booking_no ?? '#'.$package->booking_id }}
                                     </p>
                                     <small class="text-muted">
-                                        {{ $package->created_at->format('d M Y') }}
+                                        {{ ($package->booking?->created_at ?? $package->created_at)->format('d M Y') }}
                                     </small>
                                 </div>
                                 <div class="booking-price">
@@ -174,7 +174,7 @@
                     <div class="card-body-custom text-center profile-card">
                         @if (auth()->user()->detail && auth()->user()->detail->image)
                             <img src="{{ asset('uploads/users/' . auth()->user()->detail->image) }}"
-                                class="rounded-circle shadow" width="90" height="90" style="object-fit:cover;">
+                                class="rounded-circle shadow profile-image" width="90" height="90">
                         @else
                             <div class="profile-avatar">
                                 <i class="fa-solid fa-user fa-2x"></i>

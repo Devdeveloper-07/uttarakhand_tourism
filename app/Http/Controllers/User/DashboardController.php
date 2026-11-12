@@ -36,18 +36,22 @@ class DashboardController extends Controller
             $query->where('user_id', $user->id);
         })->count();
 
-        $totalReviews = Review::count();
+        $totalReviews = Review::where('user_id', $user->id)->count();
 
-        $totalPayments = 0;
+        $totalPayments = Payment::where('user_id', $user->id)
+            ->where('payment_status', 'paid')
+            ->sum('amount');
 
         $recentBookings = Booking::where('user_id', $user->id)
+            ->with('item')
             ->latest()
             ->take(5)
             ->get();
 
-        $recentPackages = BookingPackage::whereHas('booking', function ($query) use ($user): void {
-            $query->where('user_id', $user->id);
-        })
+        $recentPackages = BookingPackage::with(['booking', 'package'])
+            ->whereHas('booking', function ($query) use ($user): void {
+                $query->where('user_id', $user->id);
+            })
             ->latest()
             ->take(5)
             ->get();
@@ -101,10 +105,13 @@ class DashboardController extends Controller
 
     public function hotels()
     {
-        $hotels = Hotel::latest()
+        $bookings = Auth::user()->bookings()
+            ->where('item_type', 'hotel')
+            ->with('item')
+            ->latest()
             ->paginate(10);
 
-        return view('user.hotels.index', compact('hotels'));
+        return view('user.hotels.index', compact('bookings'));
     }
 
     /*
@@ -115,9 +122,15 @@ class DashboardController extends Controller
 
     public function hotelShow($id)
     {
-        $hotel = Hotel::findOrFail($id);
+        $booking = Auth::user()->bookings()
+            ->where('item_type', 'hotel')
+            ->with('item')
+            ->findOrFail($id);
+        $hotel = $booking->item;
 
-        return view('user.hotels.show', compact('hotel'));
+        abort_unless($hotel instanceof Hotel, 404);
+
+        return view('user.hotels.show', compact('booking', 'hotel'));
     }
 
     /*
@@ -128,10 +141,13 @@ class DashboardController extends Controller
 
     public function packages()
     {
-        $packages = Package::latest()
+        $bookings = Auth::user()->bookings()
+            ->where('item_type', 'package')
+            ->with('item')
+            ->latest()
             ->paginate(10);
 
-        return view('user.packages.index', compact('packages'));
+        return view('user.packages.index', compact('bookings'));
     }
 
     /*
@@ -142,9 +158,15 @@ class DashboardController extends Controller
 
     public function packageShow($id)
     {
-        $package = Package::findOrFail($id);
+        $booking = Auth::user()->bookings()
+            ->where('item_type', 'package')
+            ->with('item')
+            ->findOrFail($id);
+        $package = $booking->item;
 
-        return view('user.packages.show', compact('package'));
+        abort_unless($package instanceof Package, 404);
+
+        return view('user.packages.show', compact('booking', 'package'));
     }
 
 

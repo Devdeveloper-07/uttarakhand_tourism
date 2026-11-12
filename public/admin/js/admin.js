@@ -2,31 +2,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Sidebar Toggle
     const menuToggle = document.getElementById('menu-toggle');
-    const wrapper = document.querySelector('.wrapper');
+    const wrapper = document.querySelector('.admin-dashboard .wrapper');
+    const sidebar = document.getElementById('adminSidebar');
+    const mobileLayout = window.matchMedia('(max-width: 991.98px)');
 
-    if (menuToggle && wrapper) {
+    if (menuToggle && wrapper && sidebar) {
+        const syncSidebar = () => {
+            menuToggle.setAttribute('aria-expanded', String(
+                mobileLayout.matches
+                    ? sidebar.classList.contains('active')
+                    : !wrapper.classList.contains('sidebar-collapsed')
+            ));
+        };
+
         menuToggle.addEventListener('click', function() {
-            wrapper.classList.toggle('sidebar-collapsed');
-
-            // Save state to localStorage
-            const isCollapsed = wrapper.classList.contains('sidebar-collapsed');
-            localStorage.setItem('sidebarCollapsed', isCollapsed);
+            if (mobileLayout.matches) {
+                sidebar.classList.toggle('active');
+            } else {
+                wrapper.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('sidebarCollapsed', wrapper.classList.contains('sidebar-collapsed'));
+            }
+            syncSidebar();
         });
 
-        // Restore state
-        const savedState = localStorage.getItem('sidebarCollapsed');
-        if (savedState === 'true') {
+        if (!mobileLayout.matches && localStorage.getItem('sidebarCollapsed') === 'true') {
             wrapper.classList.add('sidebar-collapsed');
         }
-    }
 
-    // Mobile Sidebar Toggle
-    const sidebar = document.querySelector('.sidebar');
-
-    if (window.innerWidth < 992) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
+        mobileLayout.addEventListener('change', function(event) {
+            sidebar.classList.remove('active');
+            wrapper.classList.toggle('sidebar-collapsed', !event.matches && localStorage.getItem('sidebarCollapsed') === 'true');
+            syncSidebar();
         });
+        syncSidebar();
     }
 
     // Active Nav Item
@@ -60,7 +68,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
        function animateCounter(el) {
             const target = parseFloat(el.getAttribute('data-count'));
-            const decimal = parseInt(el.getAttribute('data-decimal')) || 0;
+           if (!Number.isFinite(target)) {
+               return;
+           }
+           const decimal = parseInt(el.getAttribute('data-decimal')) || 0;
             const duration = 2000;
             const start = 0;
             const increment = target / (duration / 16);
@@ -91,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }, observerOptions);
 
-        document.querySelectorAll('.stat-number').forEach(el => {
+        document.querySelectorAll('.stat-number[data-count]').forEach(el => {
             observer.observe(el);
         });
 

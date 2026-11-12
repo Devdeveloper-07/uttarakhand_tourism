@@ -26,7 +26,7 @@
         </div>
     </div>
     <div class="about-wave">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#f8fafc"/>
         </svg>
     </div>
@@ -35,11 +35,11 @@
 <!-- About Section -->
 <section class="about-main-section">
     <div class="container">
-        <div class="row align-items-center g-5">
+        <div class="row align-items-center g-4 g-lg-5">
             <div class="col-lg-6">
                 <div class="about-image-wrapper">
                     <div class="about-image-main">
-                        <img src="{{ asset('assets/image/about.png') }}" alt="About Uttarakhand Tourism" loading="lazy">
+                        <img src="{{ asset('assets/image/about.png') }}" alt="About Uttarakhand Travels" loading="lazy">
                         <div class="about-image-shine"></div>
                     </div>
                     <div class="about-float-card">
@@ -68,9 +68,9 @@
                     <span class="about-section-tag">
                         <i class="fa-solid fa-circle-info"></i> About Us
                     </span>
-                    <h2 class="about-heading">Welcome To Uttarakhand Tourism</h2>
+                    <h2 class="about-heading">Welcome To Uttarakhand Travels</h2>
                     <p class="about-lead">
-                        Uttarakhand Tourism is dedicated to providing unforgettable travel experiences across the beautiful state of Uttarakhand.
+                        Uttarakhand Travels is dedicated to providing unforgettable travel experiences across the beautiful state of Uttarakhand.
                     </p>
                     <p class="about-body">
                         We offer premium hotels, comfortable stays, customized holiday packages and complete travel assistance for individuals, families and groups. Our mission is to showcase the pristine beauty of the Himalayas while ensuring world-class hospitality.

@@ -1,0 +1,420 @@
+﻿.frontend-site{--ui-ink:#172b3d;--ui-muted:#697887;--ui-primary:#1768d2;--ui-bg:#f4f7fb;--ui-line:#e3eaf2;--ui-shadow:0 14px 38px rgba(24,48,76,.08);font-family:Inter,"Segoe UI",sans-serif;color:var(--ui-ink);background:var(--ui-bg)}
+.frontend-site .site-header{background:rgba(255,255,255,.96);border-color:var(--ui-line);box-shadow:0 5px 24px rgba(19,43,67,.055)}
+.frontend-site .site-header .navbar{min-height:78px}
+.frontend-site .site-header .nav-link{border-radius:999px;font-weight:650}
+.frontend-site .site-header .nav-link.active,.frontend-site .site-header .nav-link:hover{color:#1768d2!important;background:#edf5ff!important}
+.frontend-site .btn-nav-primary,.frontend-site .mmt-search-btn,.frontend-site .mmt-book,.frontend-site .btn-search,.frontend-site .filter-btn{background:#1768d2;border-color:#1768d2;border-radius:11px}
+.frontend-site .btn-nav-primary:hover,.frontend-site .mmt-search-btn:hover,.frontend-site .mmt-book:hover,.frontend-site .btn-search:hover,.frontend-site .filter-btn:hover{background:#0f55b6}
+.frontend-site .mmt-home-hero{background:url("../../assets/image/about.png") 75% 44%/cover no-repeat,#123858}
+.frontend-site .mmt-home-hero h1{color:#fff!important;font-size:clamp(2.6rem,5.4vw,4.8rem)}
+.frontend-site .mmt-home-hero h1 em{color:#ffd184}
+.frontend-site .mmt-search-card,.frontend-site .search-card,.frontend-site .filter-wrapper{border:1px solid var(--ui-line);border-radius:20px;background:#fff;box-shadow:0 22px 60px rgba(15,41,68,.13)}
+.frontend-site .mmt-field input,.frontend-site .mmt-field select,.frontend-site .form-control,.frontend-site .form-select{border-color:#dce5ef;border-radius:11px}
+.frontend-site .mmt-field input:focus,.frontend-site .mmt-field select:focus,.frontend-site .form-control:focus,.frontend-site .form-select:focus{border-color:#8cb6e7;box-shadow:0 0 0 4px rgba(23,104,210,.1)}
+.frontend-site .mmt-section,.frontend-site .packages-section,.frontend-site .hotels-section{background:var(--ui-bg)}
+.frontend-site .mmt-section-head h2,.frontend-site .section-title{color:var(--ui-ink);letter-spacing:-.04em}
+.frontend-site .mmt-hotel-card,.frontend-site .mmt-list-card,.frontend-site .mmt-grid-card,.frontend-site .feature-box,.frontend-site .testimonial-card,.frontend-site .info-card-premium,.frontend-site .booking-card{border:1px solid var(--ui-line);border-radius:18px;background:#fff;box-shadow:0 9px 28px rgba(24,48,76,.055)}
+.frontend-site .mmt-hotel-card:hover,.frontend-site .mmt-list-card:hover,.frontend-site .mmt-grid-card:hover{transform:translateY(-3px);box-shadow:var(--ui-shadow)}
+.frontend-site .mmt-card-body h4,.frontend-site .mmt-price,.frontend-site .mmt-section-head h2{color:#163653}
+.frontend-site .mmt-meta i,.frontend-site .section-tag,.frontend-site .mmt-link{color:#1768d2}
+.frontend-site .mmt-amenities span,.frontend-site .amenity-tag{border-color:#dce9f6;color:#41617f;background:#f1f7fd}
+.frontend-site .hotels-hero,.frontend-site .hero-banner,.frontend-site .about-hero,.frontend-site .contact-hero,.frontend-site .page-banner{background:radial-gradient(ellipse at 85% 10%,rgba(233,163,59,.2),transparent 35%),linear-gradient(115deg,#102e4b,#1768a8)}
+.frontend-site .hero-title,.frontend-site .about-title,.frontend-site .contact-title,.frontend-site .page-banner h1{color:#fff}
+.frontend-site .search-section,.frontend-site .filter-bar{margin-top:-34px}
+.frontend-site .trust-item,.frontend-site .listing-results-bar,.frontend-site .results-bar{border-color:var(--ui-line);border-radius:14px;background:#fff}
+.frontend-site .trust-icon,.frontend-site .feature-icon{color:#1768d2;background:#edf5ff}
+.frontend-site .pagination .active .page-link{border-color:#1768d2;background:#1768d2}
+.frontend-site #cta-section{background:linear-gradient(110deg,#113759,#1768b3 70%,#238caa)}
+.frontend-site .site-footer{color:#dce7f1;background:#10283d}
+.frontend-site .footer-newsletter{background:#173a58}
+.frontend-site .footer-main{background:#10283d}
+.frontend-site .footer-bottom{background:#0c2032}
+.frontend-site .footer-links a,.frontend-site .footer-desc,.frontend-site .footer-contact-mini{color:#b8c9d8}
+.frontend-site .footer-links a:hover{color:#ffd184}
+.frontend-site :focus-visible{outline:3px solid rgba(233,163,59,.55);outline-offset:3px}
+@media(max-width:767.98px){.frontend-site .mmt-hotel-card,.frontend-site .mmt-list-card{grid-template-columns:1fr}.frontend-site .mmt-search-body{padding:16px}.frontend-site .site-header .navbar{min-height:68px}}
+.frontend-site .home-eyebrow{display:flex;align-items:center;justify-content:center;gap:11px;margin:0 auto 20px;color:#ead9b8;font-size:.72rem;font-weight:700;letter-spacing:.18em}
+.frontend-site .home-eyebrow span{width:28px;height:1px;background:#c8a66d}
+.frontend-site .mmt-home-hero h1{max-width:940px;margin-bottom:18px;color:#fff!important;font-family:Georgia,"Times New Roman",serif;font-size:clamp(3rem,6vw,5.35rem);font-weight:500;line-height:.99;letter-spacing:-.055em;text-shadow:0 3px 26px rgba(0,0,0,.18)}
+.frontend-site .mmt-home-hero h1 em{color:#ffd184;font-weight:500;font-style:italic}
+.frontend-site .home-section-kicker{display:block;margin-bottom:9px;color:#a17d4e;font-size:.68rem;font-weight:750;letter-spacing:.16em}
+.frontend-site .home-destinations-section{padding:54px 0 20px;background:#f4f7fb}
+.frontend-site .home-destinations-heading{display:flex;align-items:end;justify-content:space-between;gap:22px;margin-bottom:22px}
+.frontend-site .home-destinations-heading h2{margin:0 0 7px;color:#172f45;font-size:clamp(1.7rem,3vw,2.3rem);font-weight:750;letter-spacing:-.04em}
+.frontend-site .home-destinations-heading p{margin:0;color:#718093}
+.frontend-site .home-destination-card{display:flex;min-height:210px;height:100%;flex-direction:column;overflow:hidden;border:1px solid #e3eaf2;border-radius:16px;color:#172f45;background:#fff;box-shadow:0 8px 24px rgba(24,48,76,.05);transition:transform .2s ease,box-shadow .2s ease}
+.frontend-site .home-destination-card:hover{transform:translateY(-4px);color:#1768d2;box-shadow:0 16px 34px rgba(24,48,76,.1)}
+.frontend-site .home-destination-art{display:grid;height:124px;flex:0 0 124px;place-items:center;color:rgba(255,255,255,.88);background:linear-gradient(145deg,#7e9f9b,#c7d7cd 55%,#e4d4b9);font-size:2rem}
+.frontend-site .col-md-3:nth-child(4n+2) .home-destination-art{background:linear-gradient(145deg,#72919f,#c6d5d8 58%,#e9dec8)}
+.frontend-site .col-md-3:nth-child(4n+3) .home-destination-art{background:linear-gradient(145deg,#829c82,#d1d9c3 58%,#e8d5b7)}
+.frontend-site .col-md-3:nth-child(4n) .home-destination-art{background:linear-gradient(145deg,#758d9a,#c4d3d3 58%,#e7d9c7)}
+.frontend-site .home-destination-name{padding:14px 15px 0;font-size:1rem;font-weight:700}
+.frontend-site .home-destination-link{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding:8px 15px 14px;color:#718093;font-size:.8rem;font-weight:650}
+.frontend-site .home-hotels-section{padding-top:58px}
+.frontend-site .home-hotels-section .mmt-section-head h2,.frontend-site .home-packages-section .mmt-section-head h2,.frontend-site #features-section .mmt-section-head h2,.frontend-site #gallery-section .mmt-section-head h2,.frontend-site #testimonials-section .mmt-section-head h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2rem,3.6vw,3rem);font-weight:500}
+@media(max-width:767.98px){.frontend-site .home-eyebrow{margin-bottom:16px;font-size:.62rem}.frontend-site .mmt-home-hero h1{font-size:clamp(2.65rem,12vw,4rem)}.frontend-site .home-destinations-section{padding:40px 0 12px}.frontend-site .home-destinations-heading{align-items:flex-start;flex-direction:column}.frontend-site .home-destination-card{min-height:185px}.frontend-site .home-destination-art{height:105px;flex-basis:105px}}
+
+/* Homepage layout fixes and finishing */
+.frontend-site a { text-decoration:none; }
+.frontend-site .mmt-home-hero {
+    position:relative; isolation:isolate; overflow:visible;
+    min-height:560px; padding:76px 0 78px; color:#fff;
+    background:
+      url("../../assets/image/about.png") center 42%/cover no-repeat,#102f4a;
+}
+.frontend-site .mmt-home-hero::before {
+    position:absolute; inset:0; z-index:-1; content:"";
+    background:linear-gradient(0deg,rgba(10,32,51,.28),transparent 48%);
+    pointer-events:none;
+}
+.frontend-site .mmt-home-hero > .container { position:relative; z-index:1; }
+.frontend-site .mmt-home-hero .home-eyebrow { justify-content:flex-start; margin:0 0 18px; }
+.frontend-site .mmt-home-hero h1 {
+    max-width:800px; margin:0 0 18px; text-align:left;
+    font-family:Inter,"Segoe UI",sans-serif; font-size:clamp(2.8rem,5.1vw,4.7rem);
+    font-weight:760; line-height:1.04; letter-spacing:-.055em;
+}
+.frontend-site .mmt-home-hero .lead-copy { margin:0; text-align:left; }
+.frontend-site .mmt-search-card {
+    width:min(100%,1120px); margin:35px auto 0; overflow:hidden;
+    border:1px solid rgba(255,255,255,.7); border-radius:20px;
+    color:#172b3d; background:#fff; box-shadow:0 24px 65px rgba(7,25,42,.28);
+}
+.frontend-site .mmt-search-tabs { display:flex; align-items:stretch; gap:0; padding:0 12px; border-bottom:1px solid #e6ebf1; background:#f7f9fc; }
+.frontend-site .mmt-search-tab {
+    flex:0 0 auto; min-height:56px; padding:0 22px; border:0; border-bottom:3px solid transparent;
+    color:#637286; background:transparent; font-weight:700; cursor:pointer;
+}
+.frontend-site .mmt-search-tab.active { color:#1768d2; border-bottom-color:#1768d2; background:#fff; box-shadow:none; }
+.frontend-site .mmt-search-body { display:none; padding:22px 24px 24px; }
+.frontend-site .mmt-search-body.active { display:block; }
+.frontend-site .mmt-search-body .row { --bs-gutter-x:14px; --bs-gutter-y:12px; align-items:end; }
+.frontend-site .mmt-field label { display:block; margin:0 0 7px; color:#637286; font-size:.74rem; font-weight:700; letter-spacing:.045em; text-transform:uppercase; }
+.frontend-site .mmt-field input,.frontend-site .mmt-field select {
+    display:block; width:100%; min-width:0; min-height:50px; padding:0 13px;
+    border:1px solid #dce5ef; border-radius:10px; color:#1d3044; background:#fff;
+    font-size:.96rem; font-weight:550;
+}
+.frontend-site .mmt-field input:focus,.frontend-site .mmt-field select:focus { border-color:#82addd; outline:0; box-shadow:0 0 0 3px rgba(23,104,210,.11); }
+.frontend-site .mmt-search-btn { width:100%; min-height:50px; border:0; border-radius:10px; color:#fff; background:#1768d2; font-size:.9rem; font-weight:750; letter-spacing:.035em; }
+.frontend-site .mmt-search-btn:hover { color:#fff; background:#0f55b6; }
+.frontend-site .mmt-offer-strip { justify-content:flex-start; gap:9px; margin-top:17px; }
+.frontend-site .mmt-chip { padding:8px 12px; color:#fff; background:rgba(10,33,52,.52); font-size:.77rem; }
+.frontend-site #stats-section { position:relative; z-index:2; padding:0 0 10px; margin:0; background:#f4f7fb; }
+.frontend-site #stats-section .container { position:relative; }
+.frontend-site .mmt-stat-row {
+    position:relative; z-index:2; max-width:1120px; margin:-28px auto 0; padding:8px 12px;
+    overflow:hidden; border:1px solid #e2e9f0; border-radius:17px; background:#fff;
+    box-shadow:0 14px 38px rgba(24,48,76,.09);
+}
+.frontend-site .mmt-stat { min-height:88px; padding:15px 12px; }
+.frontend-site .mmt-stat .stat-number { display:block; color:#1768d2; font-size:1.65rem; font-weight:800; line-height:1.2; }
+.frontend-site .mmt-stat .stat-label { margin-top:4px; color:#66778a; font-size:.82rem; font-weight:600; }
+.frontend-site .home-destinations-section { padding:38px 0 30px; background:#f4f7fb; }
+.frontend-site .home-destinations-heading { align-items:end; margin-bottom:20px; }
+.frontend-site .home-destination-card { text-decoration:none; }
+.frontend-site .home-destination-name { color:#183650; }
+.frontend-site .home-destination-link { text-decoration:none; }
+.frontend-site .home-hotels-section { padding-top:38px; background:#fff; }
+.frontend-site .home-hotels-section .mmt-section-head { align-items:end; margin-bottom:22px; }
+.frontend-site .home-hotels-section .mmt-hotel-card {
+    display:grid; grid-template-columns:minmax(200px,260px) minmax(0,1fr) minmax(155px,185px);
+    align-items:stretch; gap:22px; margin:0 0 16px; padding:15px;
+    border:1px solid #e4eaf0; border-radius:17px; background:#fff;
+    box-shadow:0 8px 24px rgba(24,48,76,.05);
+}
+.frontend-site .home-hotels-section .mmt-img-wrap { position:relative; min-height:180px; overflow:hidden; border-radius:12px; }
+.frontend-site .home-hotels-section .mmt-img-wrap img { width:100%; height:100%; object-fit:cover; }
+.frontend-site .home-hotels-section .mmt-card-body { min-width:0; padding:8px 0; }
+.frontend-site .home-hotels-section .mmt-card-body h4 { margin-bottom:9px; color:#173651; font-size:1.17rem; font-weight:700; }
+.frontend-site .home-hotels-section .mmt-meta { color:#687a8e; font-size:.9rem; }
+.frontend-site .home-hotels-section .mmt-amenities { display:flex; flex-wrap:wrap; gap:7px; margin-top:15px; }
+.frontend-site .home-hotels-section .mmt-amenities span { border:1px solid #e0e9f2; border-radius:999px; padding:5px 9px; color:#526a80; background:#f5f8fb; font-size:.74rem; }
+.frontend-site .home-hotels-section .mmt-card-price { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; padding:8px 5px 8px 17px; border-left:1px solid #e8edf2; text-align:right; }
+.frontend-site .home-hotels-section .mmt-rating { margin-bottom:7px; border-radius:7px; padding:5px 8px; color:#fff; background:#16815f; font-size:.78rem; font-weight:700; }
+.frontend-site .home-hotels-section .mmt-unit { color:#718196; font-size:.78rem; }
+.frontend-site .home-hotels-section .mmt-price { margin:2px 0; color:#173651; font-size:1.4rem; font-weight:800; }
+.frontend-site .home-hotels-section .mmt-book { margin-top:11px; padding:11px 15px; color:#fff; background:#1768d2; font-size:.78rem; font-weight:750; }
+.frontend-site .home-packages-section { padding:54px 0; background:#edf3f8!important; }
+.frontend-site .home-packages-section .mmt-grid-card { overflow:hidden; height:100%; border:1px solid #e1e8ef; border-radius:17px; background:#fff; box-shadow:0 9px 28px rgba(24,48,76,.055); }
+.frontend-site .home-packages-section .mmt-img-wrap { position:relative; height:220px; overflow:hidden; }
+.frontend-site .home-packages-section .mmt-img-wrap img { width:100%; height:100%; object-fit:cover; }
+.frontend-site .home-packages-section .mmt-card-body { display:flex; min-height:205px; flex-direction:column; padding:20px; }
+.frontend-site #features-section,.frontend-site #gallery-section,.frontend-site #testimonials-section { padding:56px 0; }
+.frontend-site #features-section { background:#fff!important; }
+.frontend-site #gallery-section { background:#edf3f8!important; }
+.frontend-site #gallery-section .gallery-card { overflow:hidden; border-radius:13px; }
+.frontend-site #gallery-section .gallery-image { display:block; width:100%; height:190px; object-fit:cover; }
+.frontend-site #testimonials-section { background:#fff!important; }
+.frontend-site #testimonials-section .testimonial-card { height:100%; border:1px solid #e2e9f0; border-radius:16px; background:#fff; }
+.frontend-site #cta-section { margin-top:0; padding:52px 0; }
+@media(max-width:991.98px) {
+    .frontend-site .mmt-home-hero { min-height:0; padding:58px 0 66px; }
+    .frontend-site .home-hotels-section .mmt-hotel-card { grid-template-columns:210px minmax(0,1fr) 155px; gap:15px; }
+}
+@media(max-width:767.98px) {
+    .frontend-site .mmt-home-hero { padding:44px 0 56px; background:url("../../assets/image/about.png") 68% center/cover no-repeat,#102f4a; }
+    .frontend-site .mmt-home-hero h1 { max-width:620px; font-size:clamp(2.35rem,10vw,3.55rem); }
+    .frontend-site .mmt-home-hero .lead-copy { max-width:540px; font-size:.96rem; }
+    .frontend-site .mmt-search-card { margin-top:25px; border-radius:15px; }
+    .frontend-site .mmt-search-tabs { padding:0 7px; }
+    .frontend-site .mmt-search-tab { min-height:50px; padding:0 13px; font-size:.86rem; }
+    .frontend-site .mmt-search-body { padding:16px; }
+    .frontend-site .mmt-offer-strip { gap:7px; }
+    .frontend-site .mmt-chip { font-size:.7rem; }
+    .frontend-site .mmt-stat-row { margin-top:-20px; padding:5px; }
+    .frontend-site .mmt-stat { min-height:78px; padding:10px 4px; }
+    .frontend-site .mmt-stat .stat-number { font-size:1.35rem; }
+    .frontend-site .mmt-stat .stat-label { font-size:.7rem; }
+    .frontend-site .home-destinations-section { padding:30px 0 20px; }
+    .frontend-site .home-destination-card { min-height:175px; }
+    .frontend-site .home-destination-art { height:95px; flex-basis:95px; }
+    .frontend-site .home-hotels-section .mmt-hotel-card { grid-template-columns:1fr; gap:12px; padding:13px; }
+    .frontend-site .home-hotels-section .mmt-img-wrap { min-height:205px; }
+    .frontend-site .home-hotels-section .mmt-card-price { align-items:flex-start; border-left:0; border-top:1px solid #e8edf2; padding:12px 0 0; text-align:left; }
+    .frontend-site .home-hotels-section .mmt-book { align-self:stretch; }
+    .frontend-site .home-destinations-heading { align-items:flex-start; flex-direction:column; }
+}
+.frontend-site .mmt-home-hero { background:url("../../assets/image/about.png") center 42%/cover no-repeat,#102f4a; }
+.frontend-site .mmt-search-body { display:none!important; }
+.frontend-site .mmt-search-body.active { display:block!important; }
+@media(max-width:767.98px) { .frontend-site .mmt-home-hero { background:url("../../assets/image/about.png") 68% center/cover no-repeat,#102f4a; } }
+
+/* Featured package cards */
+.frontend-site .home-packages-section { padding:58px 0 64px; background:#edf3f8!important; }
+.frontend-site .home-packages-section > .container > .mmt-section-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:27px; }
+.frontend-site .home-packages-section .mmt-section-head h2 { margin:0; color:#173651; font-size:clamp(1.8rem,3vw,2.5rem); font-weight:750; letter-spacing:-.04em; }
+.frontend-site .home-packages-section .mmt-section-head p { margin:7px 0 0; color:#6b7d90; font-size:.96rem; }
+.frontend-site .home-packages-section .mmt-link { display:inline-flex; align-items:center; min-height:40px; padding:0 15px; border:1px solid #d5e2ee; border-radius:999px; color:#1768d2; background:#fff; font-size:.76rem; font-weight:750; letter-spacing:.08em; }
+.frontend-site .home-packages-section .row { align-items:stretch; }
+.frontend-site .home-packages-section .row > [class*="col-"] { display:flex; }
+.frontend-site .home-packages-section .mmt-grid-card { display:flex; width:100%; height:100%; min-width:0; flex-direction:column; overflow:hidden; border:1px solid #e0e8ef; border-radius:17px; background:#fff; box-shadow:0 8px 24px rgba(24,48,76,.055); transition:transform .2s ease,box-shadow .2s ease; }
+.frontend-site .home-packages-section .mmt-grid-card:hover { transform:translateY(-4px); box-shadow:0 17px 36px rgba(24,48,76,.12); }
+.frontend-site .home-packages-section .mmt-grid-card .mmt-img-wrap { position:relative; flex:0 0 205px; height:205px; min-height:0; overflow:hidden; border-radius:0; background:#e6edf2; }
+.frontend-site .home-packages-section .mmt-grid-card .mmt-img-wrap img { display:block; width:100%; height:100%; object-fit:cover; transition:transform .45s ease; }
+.frontend-site .home-packages-section .mmt-grid-card:hover .mmt-img-wrap img { transform:scale(1.035); }
+.frontend-site .home-packages-section .mmt-badge,
+.frontend-site .home-packages-section .mmt-off { position:absolute; z-index:2; top:13px; left:13px; display:inline-flex; align-items:center; min-height:29px; border:1px solid rgba(255,255,255,.65); border-radius:999px; padding:5px 10px; color:#173651; background:rgba(255,255,255,.94); box-shadow:0 3px 12px rgba(16,41,64,.12); font-size:.7rem; font-weight:750; }
+.frontend-site .home-packages-section .mmt-off { right:13px; left:auto; color:#9a4a1a; background:#fff5e9; }
+.frontend-site .home-packages-section .mmt-grid-card .mmt-card-body { display:flex; min-height:230px; flex:1; flex-direction:column; padding:18px 19px 17px; }
+.frontend-site .home-packages-section .mmt-card-body h4 { display:-webkit-box; min-height:2.8em; overflow:hidden; margin:0 0 8px; color:#173651; font-size:1.12rem; font-weight:750; line-height:1.35; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+.frontend-site .home-packages-section .mmt-card-body .mmt-meta { overflow:hidden; margin-bottom:8px; color:#6d7f91; font-size:.82rem; line-height:1.5; text-overflow:ellipsis; white-space:nowrap; }
+.frontend-site .home-packages-section .mmt-card-body > p { display:-webkit-box; min-height:3.9em; overflow:hidden; margin:0 0 16px; color:#68798b; font-size:.86rem; line-height:1.55; -webkit-box-orient:vertical; -webkit-line-clamp:3; }
+.frontend-site .home-packages-section .mmt-card-body > .d-flex { align-items:end!important; gap:12px; margin-top:auto!important; padding-top:14px; border-top:1px solid #edf1f4; }
+.frontend-site .home-packages-section .mmt-card-body .mmt-unit { color:#7b8997; font-size:.73rem; }
+.frontend-site .home-packages-section .mmt-card-body .mmt-price { color:#173651; font-size:1.35rem!important; font-weight:800; line-height:1.25; }
+.frontend-site .home-packages-section .mmt-card-body .mmt-book { display:inline-flex; min-width:82px; min-height:40px; align-items:center; justify-content:center; flex:0 0 auto; border:0; border-radius:9px; padding:0 14px; color:#fff!important; background:#1768d2; font-size:.74rem; font-weight:750; letter-spacing:.04em; text-decoration:none; }
+.frontend-site .home-packages-section .mmt-card-body .mmt-book:hover { color:#fff!important; background:#0f55b6; }
+@media(max-width:767.98px) {
+    .frontend-site .home-packages-section { padding:42px 0; }
+    .frontend-site .home-packages-section > .container > .mmt-section-head { align-items:flex-start; }
+    .frontend-site .home-packages-section .mmt-grid-card .mmt-img-wrap { flex-basis:170px; height:170px; }
+    .frontend-site .home-packages-section .mmt-grid-card .mmt-card-body { min-height:220px; padding:15px; }
+}
+@media(max-width:575.98px) {
+    .frontend-site .home-packages-section .mmt-section-head { flex-direction:column; }
+    .frontend-site .home-packages-section .mmt-grid-card .mmt-img-wrap { flex-basis:145px; height:145px; }
+    .frontend-site .home-packages-section .mmt-card-body h4 { font-size:.98rem; }
+    .frontend-site .home-packages-section .mmt-card-body .mmt-price { font-size:1.12rem!important; }
+}
+
+/* Hotel and holiday package booking widget */
+.frontend-site .mmt-home-hero {
+    min-height:620px;
+    padding:76px 0 86px;
+    background:
+
+        url("../../assets/image/about.png") center 42%/cover no-repeat,#102f4a;
+}
+.frontend-site .mmt-home-hero .home-eyebrow { margin:0 auto 16px; justify-content:center; }
+.frontend-site .mmt-home-hero h1 { max-width:880px; margin:0 auto 14px; text-align:center; font-size:clamp(2.5rem,4.8vw,4.2rem); }
+.frontend-site .mmt-home-hero .lead-copy { max-width:690px; margin:0 auto; text-align:center; }
+.frontend-site .mmt-search-card {
+    position:relative;
+    width:min(100%,1120px);
+    margin:86px auto 0;
+    overflow:visible;
+    border:0;
+    border-radius:18px;
+    background:#fff;
+    box-shadow:0 24px 68px rgba(5,24,42,.3);
+}
+.frontend-site .mmt-search-tabs {
+    position:absolute;
+    top:-70px;
+    left:50%;
+    z-index:2;
+    display:flex;
+    width:max-content;
+    max-width:calc(100% - 24px);
+    transform:translateX(-50%);
+    gap:0;
+    overflow:hidden;
+    border:1px solid #e2e8ef;
+    border-radius:15px 15px 0 0;
+    padding:0 10px;
+    background:#fff;
+    box-shadow:0 8px 26px rgba(15,39,61,.12);
+}
+.frontend-site .mmt-search-tab {
+    display:flex;
+    min-width:190px;
+    min-height:68px;
+    align-items:center;
+    justify-content:center;
+    gap:11px;
+    border:0;
+    border-bottom:3px solid transparent;
+    border-radius:0;
+    padding:10px 20px;
+    color:#5d6e80;
+    background:#fff;
+    font-size:.94rem;
+    font-weight:700;
+    transition:color .18s ease,background .18s ease,border-color .18s ease;
+}
+.frontend-site .mmt-search-tab::before {
+    color:#8294a7;
+    font-family:"Font Awesome 6 Free";
+    font-size:1.15rem;
+    font-weight:900;
+}
+.frontend-site .mmt-search-tab[data-tab="hotels"]::before { content:"\\f594"; }
+.frontend-site .mmt-search-tab[data-tab="holidays"]::before { content:"\\f0f2"; }
+.frontend-site .mmt-search-tab.active {
+    color:#1768d2;
+    border-bottom-color:#1768d2;
+    background:#f5f9ff;
+}
+.frontend-site .mmt-search-tab.active::before { color:#1768d2; }
+.frontend-site .mmt-search-body { padding:27px 27px 28px; }
+.frontend-site .mmt-search-body .row { --bs-gutter-x:16px; --bs-gutter-y:15px; }
+.frontend-site .mmt-field label { margin-bottom:9px; color:#53677b; font-size:.76rem; letter-spacing:.035em; }
+.frontend-site .mmt-field input,.frontend-site .mmt-field select {
+    min-height:58px;
+    border:1px solid #dce4ec;
+    border-radius:10px;
+    padding:0 15px;
+    color:#1b3045;
+    background:#fff;
+    font-size:.97rem;
+    font-weight:550;
+}
+.frontend-site .mmt-field input::placeholder { color:#9aa8b5; }
+.frontend-site .mmt-field input:focus,.frontend-site .mmt-field select:focus { border-color:#77a8da; box-shadow:0 0 0 4px rgba(23,104,210,.1); }
+.frontend-site .mmt-search-btn {
+    min-height:58px;
+    border-radius:10px;
+    background:linear-gradient(110deg,#1682e8,#1768d2);
+    font-size:.9rem;
+    font-weight:800;
+    letter-spacing:.08em;
+    box-shadow:0 8px 18px rgba(23,104,210,.19);
+}
+.frontend-site .mmt-offer-strip { margin-top:20px; justify-content:center; }
+.frontend-site .mmt-chip { border-color:rgba(255,255,255,.24); background:rgba(9,32,52,.5); padding:8px 13px; }
+@media(max-width:767.98px) {
+    .frontend-site .mmt-home-hero { min-height:0; padding:48px 0 62px; }
+    .frontend-site .mmt-home-hero h1 { font-size:clamp(2.3rem,9vw,3.5rem); }
+    .frontend-site .mmt-search-card { margin-top:78px; border-radius:15px; }
+    .frontend-site .mmt-search-tabs { top:-62px; width:max-content; }
+    .frontend-site .mmt-search-tab { min-width:0; min-height:60px; gap:8px; padding:8px 15px; font-size:.83rem; }
+    .frontend-site .mmt-search-tab::before { font-size:1rem; }
+    .frontend-site .mmt-search-body { padding:18px; }
+    .frontend-site .mmt-field input,.frontend-site .mmt-field select,.frontend-site .mmt-search-btn { min-height:51px; }
+    .frontend-site .mmt-offer-strip { justify-content:flex-start; }
+}
+@media(max-width:390px) {
+    .frontend-site .mmt-search-tab { padding:8px 10px; font-size:.78rem; }
+}
+.frontend-site .mmt-search-tab[data-tab="hotels"]::before { content:"\f594"; }
+.frontend-site .mmt-search-tab[data-tab="holidays"]::before { content:"\f0f2"; }
+
+.frontend-site .home-destination-art { position:relative; display:block; overflow:hidden; background:#dce7ed; }
+.frontend-site .home-destination-art::after { position:absolute; inset:45% 0 0; content:""; background:linear-gradient(180deg,transparent,rgba(13,37,57,.2)); pointer-events:none; }
+.frontend-site .home-destination-art img { display:block; width:100%; height:100%; object-fit:cover; object-position:center; transition:transform .45s ease; }
+.frontend-site .home-destination-card:hover .home-destination-art img { transform:scale(1.05); }
+
+/* Package and hotel results: image, details, and booking column */
+.frontend-site .packages-section .mmt-list-card,
+.frontend-site .hotels-list-section .mmt-list-card {
+    display:grid;
+    grid-template-columns:minmax(210px,270px) minmax(0,1fr) minmax(155px,185px);
+    align-items:stretch;
+    gap:22px;
+    min-height:218px;
+    margin:0 0 18px;
+    padding:15px;
+    overflow:hidden;
+    border:1px solid #e1e8ef;
+    border-radius:17px;
+    background:#fff;
+    box-shadow:0 8px 26px rgba(24,48,76,.055);
+    transition:transform .2s ease,box-shadow .2s ease;
+}
+.frontend-site .packages-section .mmt-list-card:hover,
+.frontend-site .hotels-list-section .mmt-list-card:hover { transform:translateY(-2px); box-shadow:0 16px 36px rgba(24,48,76,.1); }
+.frontend-site .packages-section .mmt-list-card .mmt-img-wrap,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-img-wrap { position:relative; min-height:188px; overflow:hidden; border-radius:12px; background:#e6edf2; }
+.frontend-site .packages-section .mmt-list-card .mmt-img-wrap img,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-img-wrap img { display:block; width:100%; height:100%; min-height:188px; object-fit:cover; }
+.frontend-site .packages-section .mmt-list-card .mmt-card-body,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-card-body { display:flex; min-width:0; flex-direction:column; justify-content:center; padding:9px 0; }
+.frontend-site .packages-section .mmt-list-card .mmt-card-body h4,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-card-body h4 { margin:0 0 9px; color:#173651; font-size:1.2rem; font-weight:750; line-height:1.35; }
+.frontend-site .packages-section .mmt-list-card .mmt-meta,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-meta { margin-bottom:9px; color:#61758a; font-size:.86rem; line-height:1.5; }
+.frontend-site .packages-section .mmt-list-card .mmt-card-body p,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-card-body p { margin:0; color:#6b7d8e; font-size:.88rem; line-height:1.65; }
+.frontend-site .packages-section .mmt-list-card .mmt-card-price,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-card-price { display:flex; flex-direction:column; align-items:flex-end; justify-content:center; padding:8px 4px 8px 18px; border-left:1px solid #e8edf2; text-align:right; }
+.frontend-site .packages-section .mmt-list-card .mmt-price,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-price { margin:4px 0; color:#173651; font-size:1.48rem; font-weight:800; }
+.frontend-site .packages-section .mmt-list-card .mmt-unit,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-unit { color:#718196; font-size:.78rem; }
+.frontend-site .packages-section .mmt-list-card .mmt-book,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-book { display:inline-flex; min-width:126px; min-height:42px; align-items:center; justify-content:center; margin-top:12px; border:0; border-radius:9px; padding:0 15px; color:#fff!important; background:#1768d2; font-size:.77rem; font-weight:750; text-decoration:none; }
+.frontend-site .packages-section .mmt-list-card .mmt-book:hover,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-book:hover { background:#0f55b6; }
+.frontend-site .packages-section .mmt-list-card .mmt-badge,
+.frontend-site .hotels-list-section .mmt-list-card .mmt-badge { position:absolute; top:11px; left:11px; z-index:2; border:1px solid rgba(255,255,255,.7); border-radius:999px; padding:5px 9px; color:#173651; background:rgba(255,255,255,.94); font-size:.72rem; font-weight:700; }
+@media(max-width:767.98px) {
+    .frontend-site .packages-section .mmt-list-card,
+    .frontend-site .hotels-list-section .mmt-list-card { grid-template-columns:1fr; gap:13px; padding:13px; }
+    .frontend-site .packages-section .mmt-list-card .mmt-img-wrap,
+    .frontend-site .packages-section .mmt-list-card .mmt-img-wrap img,
+    .frontend-site .hotels-list-section .mmt-list-card .mmt-img-wrap,
+    .frontend-site .hotels-list-section .mmt-list-card .mmt-img-wrap img { min-height:210px; height:210px; }
+    .frontend-site .packages-section .mmt-list-card .mmt-card-body,
+    .frontend-site .hotels-list-section .mmt-list-card .mmt-card-body { padding:4px 2px; }
+    .frontend-site .packages-section .mmt-list-card .mmt-card-price,
+    .frontend-site .hotels-list-section .mmt-list-card .mmt-card-price { align-items:flex-start; border-top:1px solid #e8edf2; border-left:0; padding:12px 2px 2px; text-align:left; }
+    .frontend-site .packages-section .mmt-list-card .mmt-book,
+    .frontend-site .hotels-list-section .mmt-list-card .mmt-book { width:100%; }
+}
+
+/* Shared treatment for all existing public pages and booking forms. */
+.frontend-site main,.frontend-site .page-content{min-width:0}
+.frontend-site .container{--bs-gutter-x:clamp(1.25rem,3vw,2rem)}
+.frontend-site .filter-form{gap:14px}
+.frontend-site .filter-group input,.frontend-site .filter-group select,.frontend-site .filter-group textarea{min-height:48px;border:1px solid #dce5ef;border-radius:10px;padding:10px 13px;color:#263b50;background:#fff}
+.frontend-site .filter-group input:focus,.frontend-site .filter-group select:focus,.frontend-site .filter-group textarea:focus{border-color:#8cb6e7;outline:0;box-shadow:0 0 0 4px rgba(23,104,210,.1)}
+.frontend-site .hotel-card,.frontend-site .package-card,.frontend-site .gallery-item,.frontend-site .info-card,.frontend-site .contact-card,.frontend-site .about-card{overflow:hidden;border:1px solid var(--ui-line);border-radius:16px;background:#fff;box-shadow:0 8px 28px rgba(24,48,76,.055)}
+.frontend-site .hotel-card img,.frontend-site .package-card img,.frontend-site .gallery-item img{max-width:100%;object-fit:cover}
+.frontend-site .hotel-card:hover,.frontend-site .package-card:hover,.frontend-site .gallery-item:hover{box-shadow:var(--ui-shadow)}
+.frontend-site .btn,.frontend-site button.btn{font-weight:650}
+.frontend-site .form-label,.frontend-site label{color:#40566c;font-weight:650}
+.frontend-site .alert{border-radius:12px}
+.frontend-site .pagination{gap:5px}
+.frontend-site .pagination .page-link{border-color:#e0e8f0;border-radius:8px!important;color:#31536f}
+.frontend-site .empty-state{border:1px dashed #cbd8e5;border-radius:14px;padding:30px;background:#fff;color:#718093;text-align:center}
+.frontend-site .booking-card,.frontend-site .hotel-detail-card,.frontend-site .package-detail-card{padding:clamp(18px,3vw,30px)}
+.frontend-site .hotel-gallery img,.frontend-site .package-gallery img{border-radius:14px;object-fit:cover}
+.frontend-site .site-footer a{transition:color .18s ease}
+@media(max-width:767.98px){
+    .frontend-site .filter-bar{margin-top:-20px}
+    .frontend-site .filter-wrapper{padding:17px}
+    .frontend-site .hero-title,.frontend-site .page-banner h1{font-size:clamp(2rem,9vw,3rem)}
+    .frontend-site .hotel-gallery img,.frontend-site .package-gallery img{max-height:300px}
+    .frontend-site .table-responsive{border-radius:12px}
+}

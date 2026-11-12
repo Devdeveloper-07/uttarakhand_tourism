@@ -20,6 +20,7 @@ class Payment extends Model
         'base_amount',
         'gst_percentage',
         'gst_amount',
+        'gst_category',
         'amount',
         'payment_status',
         'payment_date',

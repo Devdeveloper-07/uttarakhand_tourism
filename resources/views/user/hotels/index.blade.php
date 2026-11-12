@@ -1,211 +1,87 @@
 @extends('layouts.user')
 
-@section('title','My Hotels')
+@section('title', 'My Hotel Bookings')
 
 @section('content')
-
-<div class="dashboard-container">
-
     <div class="page-header">
-
         <div>
-
-            <h2 class="page-title">
-
-                My Hotels
-
-            </h2>
-
-            <p class="page-subtitle">
-
-                View all hotels available for your bookings.
-
-            </p>
-
+            <h1 class="page-title">My Hotel Bookings</h1>
+            <p class="page-subtitle">Hotel reservations made from your account.</p>
         </div>
-
     </div>
 
-    @if(session('success'))
-
-        <div class="alert alert-success">
-
-            {{ session('success') }}
-
-        </div>
-
-    @endif
-
-    <div class="content-card">
-
+    <section class="content-card">
         <div class="card-header-custom">
-
-            <h5>
-
-                <i class="fa-solid fa-hotel"></i>
-
-                Hotel List
-
-            </h5>
-
+            <h2 class="h5 mb-0"><i class="fa-solid fa-hotel me-2"></i>Hotel reservations</h2>
+            <span class="text-muted small">{{ $bookings->total() }} total</span>
         </div>
-
-        <div class="card-body-custom">
-
-            <div class="table-responsive">
-
-                <table class="table table-hover align-middle">
-
-                    <thead class="table-dark">
-
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Hotel</th>
+                        <th>Location</th>
+                        <th>Stay</th>
+                        <th>Guests / rooms</th>
+                        <th>Booking status</th>
+                        <th><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($bookings as $booking)
+                        @php
+                            $hotel = $booking->item;
+                            $statusClass = match (strtolower((string) $booking->booking_status)) {
+                                'confirmed', 'completed' => 'text-bg-success',
+                                'pending' => 'text-bg-warning',
+                                'cancelled', 'failed' => 'text-bg-danger',
+                                default => 'text-bg-secondary',
+                            };
+                        @endphp
                         <tr>
-
-                            <th>#</th>
-
-                            <th>Image</th>
-
-                            <th>Hotel</th>
-
-                            <th>Location</th>
-
-                            <th>Rooms</th>
-
-                            <th>Status</th>
-
-                            <th width="130">
-
-                                Action
-
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @forelse($hotels as $hotel)
-
-                        <tr>
-
                             <td>
-
-                                {{ $loop->iteration }}
-
-                            </td>
-
-                            <td width="90">
-
-                                @if($hotel->featured_image)
-
-                                    <img src="{{ asset('uploads/hotels/'.$hotel->featured_image) }}"
-                                         width="70"
-                                         height="70"
-                                         class="rounded shadow"
-                                         style="object-fit:cover;">
-
-                                @else
-
-                                    <img src="https://via.placeholder.com/70"
-                                         class="rounded shadow">
-
-                                @endif
-
-                            </td>
-
-                            <td>
-
-                                {{ $hotel->hotel_name }}
-
-                            </td>
-
-                            <td>
-
-                                {{ $hotel->location }}
-
-                            </td>
-
-                            <td>
-
-                                {{ $hotel->rooms_count ?? '-' }}
-
-                            </td>
-
-                            <td>
-
-                                @if($hotel->status)
-
-                                    <span class="badge bg-success">
-
-                                        Active
-
-                                    </span>
-
-                                @else
-
-                                    <span class="badge bg-danger">
-
-                                        Inactive
-
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-                            <td>
-
-                                <a href="{{ route('user.hotels.show',$hotel->id) }}"
-                                   class="btn btn-info btn-sm">
-
-                                    <i class="fa-solid fa-eye"></i>
-
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-                        @empty
-
-                        <tr>
-
-                            <td colspan="7">
-
-                                <div class="text-center py-5">
-
-                                    <i class="fa-solid fa-hotel fa-3x text-secondary"></i>
-
-                                    <h5 class="mt-3">
-
-                                        No Hotels Found
-
-                                    </h5>
-
+                                <div class="d-flex align-items-center gap-3">
+                                    @if ($hotel?->thumbnail)
+                                        <img src="{{ asset('uploads/hotels/'.$hotel->thumbnail) }}" class="table-item-image" alt="{{ $hotel->hotel_name }}">
+                                    @else
+                                        <span class="table-item-placeholder"><i class="fa-solid fa-hotel"></i></span>
+                                    @endif
+                                    <div>
+                                        <div class="fw-semibold">{{ $hotel?->hotel_name ?? 'Hotel listing unavailable' }}</div>
+                                        <div class="small text-muted">{{ $booking->booking_no ?: 'Booking #'.$booking->id }}</div>
+                                    </div>
                                 </div>
-
                             </td>
-
+                            <td>{{ $hotel?->city ?: ($hotel?->location ?? '—') }}</td>
+                            <td>
+                                {{ $booking->check_in?->format('d M Y') ?? '—' }}<br>
+                                <span class="small text-muted">to {{ $booking->check_out?->format('d M Y') ?? '—' }}</span>
+                            </td>
+                            <td>{{ $booking->guest ?? '—' }} / {{ $booking->room_count ?? '—' }}</td>
+                            <td><span class="badge rounded-pill {{ $statusClass }}">{{ str()->headline($booking->booking_status ?: 'Unknown') }}</span></td>
+                            <td class="text-end">
+                                <a href="{{ route('user.hotels.show', $booking->id) }}" class="btn btn-sm btn-outline-primary" aria-label="View hotel booking">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </td>
                         </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-            <div class="mt-4">
-
-                {{ $hotels->links() }}
-
-            </div>
-
+                    @empty
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state my-3">
+                                    <i class="fa-solid fa-hotel fa-2x"></i>
+                                    <h2 class="h5">No hotel bookings yet</h2>
+                                    <p>Your hotel reservations will appear here after you book a stay.</p>
+                                    <a href="{{ route('hotels') }}" class="btn btn-primary mt-2">Explore hotels</a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
-    </div>
-
-</div>
-
+        @if ($bookings->hasPages())
+            <div class="p-3">{{ $bookings->links() }}</div>
+        @endif
+    </section>
 @endsection

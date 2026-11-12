@@ -1,13 +1,13 @@
-<div class="sidebar">
+<div class="sidebar" id="adminSidebar">
 
     <!-- Logo -->
     <div class="sidebar-brand">
        <div class="welcome-icon">
-    <img src="{{ asset('assets/logo/logo.png') }}" alt="Uttarakhand Tourism Logo" class="welcome-logo">
+                    <img src="{{ asset('assets/logo/logo.png') }}" alt="Uttarakhand Travels logo" class="welcome-logo">
 </div>
         <div class="brand-text">
             <h4>Uttarakhand</h4>
-            <span>Tourism</span>
+            <span>Travels</span>
         </div>
     </div>
 
@@ -16,7 +16,7 @@
         <div class="nav-section">
             <span class="nav-label">Main</span>
             <ul>
-                <li class="active">
+                <li class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <a href="{{ route('admin.dashboard') }}">
                         <span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>
                         <span class="nav-text">Dashboard</span>
@@ -28,34 +28,47 @@
         <div class="nav-section">
             <span class="nav-label">Management</span>
             <ul>
-                <li>
+                <li class="{{ request()->routeIs('admin.hotels.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.hotels.index') }}">
                         <span class="nav-icon"><i class="fa-solid fa-hotel"></i></span>
                         <span class="nav-text">Hotels</span>
                     </a>
                 </li>
-                <li>
+                <li class="{{ request()->routeIs('admin.rooms.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.rooms.index') }}">
                         <span class="nav-icon"><i class="fa-solid fa-bed"></i></span>
                         <span class="nav-text">Rooms</span>
                     </a>
                 </li>
 
-                <li>
+                <li class="{{ request()->routeIs('admin.room-types.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.room-types.index') }}">
                         <span class="nav-icon"><i class="fa-solid fa-tags"></i></span>
                         <span class="nav-text">Room Types</span>
                     </a>
-                </li>                <li>
+                </li>
+                <li class="{{ request()->routeIs('admin.packages.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.packages.index') }}">
                         <span class="nav-icon"><i class="fa-solid fa-suitcase-rolling"></i></span>
                         <span class="nav-text">Packages</span>
                     </a>
                 </li>
-                <li>
-                    <a href="#">
+                <li class="{{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.bookings.index') }}">
                         <span class="nav-icon"><i class="fa-solid fa-calendar-check"></i></span>
                         <span class="nav-text">Bookings</span>
+                    </a>
+                </li>
+                <li class="{{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.payments.index') }}">
+                        <span class="nav-icon"><i class="fa-solid fa-credit-card"></i></span>
+                        <span class="nav-text">Payments</span>
+                    </a>
+                </li>
+                <li class="{{ request()->routeIs('admin.gst-settings.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.gst-settings.index') }}">
+                        <span class="nav-icon"><i class="fa-solid fa-percent"></i></span>
+                        <span class="nav-text">GST Settings</span>
                     </a>
                 </li>
             </ul>
@@ -64,19 +77,19 @@
         <div class="nav-section">
             <span class="nav-label">Content</span>
             <ul>
-                <li>
+                <li class="{{ request()->routeIs('admin.galleries.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.galleries.index') }}">
                         <span class="nav-icon"><i class="fa-solid fa-images"></i></span>
                         <span class="nav-text">Gallery</span>
                     </a>
                 </li>
-                <li>
+                <li class="{{ request()->routeIs('admin.testimonials.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.testimonials.index') }}">
                         <span class="nav-icon"><i class="fa-solid fa-star"></i></span>
                         <span class="nav-text">Testimonials</span>
                     </a>
                 </li>
-                <li>
+                <li class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.users.index') }}">
                         <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
                         <span class="nav-text">Users</span>
@@ -85,17 +98,6 @@
             </ul>
         </div>
 
-        <div class="nav-section">
-            <span class="nav-label">Analytics</span>
-            <ul>
-                <li>
-                    <a href="#">
-                        <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span>
-                        <span class="nav-text">Reports</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
     </nav>
 
     <!-- Sidebar Footer -->

@@ -1,6 +1,6 @@
 // Add scrolled class on scroll
 window.addEventListener('scroll', function() {
-    const header = document.querySelector('.site-header');
+    const header = document.querySelector('.travel-header');
     if (!header) return;
 
     if (window.scrollY > 10) {
@@ -15,6 +15,26 @@ window.addEventListener('scroll', function() {
     let currentIndex = 0;
 
     document.addEventListener('DOMContentLoaded', function() {
+        const searchTabs = document.querySelectorAll('.mmt-search-tab[data-tab]');
+        const searchForms = {
+            hotels: document.getElementById('mmtHotelSearch'),
+            holidays: document.getElementById('mmtHolidaySearch')
+        };
+
+        searchTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const selected = this.dataset.tab;
+                searchTabs.forEach(item => {
+                    const active = item === this;
+                    item.classList.toggle('active', active);
+                    item.setAttribute('aria-pressed', active ? 'true' : 'false');
+                });
+                Object.entries(searchForms).forEach(([key, form]) => {
+                    if (form) form.classList.toggle('active', key === selected);
+                });
+            });
+        });
+
         const cards = document.querySelectorAll('.gallery-item-card img');
         galleryImages = Array.from(cards).map(img => img.getAttribute('src'));
 

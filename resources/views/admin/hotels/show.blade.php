@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="dashboard-container">
+<div class="dashboard-container hotel-detail-page record-detail-page">
 
     <!-- Page Header -->
     <div class="page-header">

@@ -137,6 +137,19 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
+                        <label for="gst_category">GST Category</label>
+                        <select id="gst_category" name="gst_category" class="form-select" required>
+                            <option value="tour_operator_eligible" @selected(old('gst_category') === 'tour_operator_eligible')>
+                                Eligible tour operator service, prescribed conditions (5%)
+                            </option>
+                            <option value="tour_operator_with_itc" @selected(old('gst_category', 'tour_operator_with_itc') === 'tour_operator_with_itc')>
+                                Tour operator service with applicable ITC (18%)
+                            </option>
+                        </select>
+                        <small class="text-muted">Choose the classification that applies to this package.</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
 
                         <label>Maximum Persons</label>
 

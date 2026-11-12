@@ -7,7 +7,7 @@
 
                 <!-- Heading -->
                 <h2 class="welcome-heading">Welcome Back!</h2>
-                <p class="welcome-subtitle">Log in to your account and continue reading</p>
+                <p class="welcome-subtitle">Sign in to pick up where your next trip begins.</p>
 
                 <!-- Session Status -->
                 <x-auth-session-status class="mb-3" :status="session('status')" />
@@ -71,23 +71,21 @@
 
                 <!-- Sign Up Link -->
                 <div class="text-center mt-4">
-                    <span style="font-size: 0.85rem; color: #6c757d;">Don't have an account? </span>
+                    <span class="signup-note">Don't have an account? </span>
                     <a href="{{ route('register') }}" class="link-signup">Sign up</a>
                 </div>
             </div>
 
             <!-- Right Side: Info Panel -->
             <div class="col-lg-6 info-side">
-                <div class="position-relative" style="z-index: 1;">
+                <div class="info-panel-content">
 
                     <!-- Brand Name -->
-                    <h1 class="brand-name">Hotel Admin Portal</h1>
+                    <h1 class="brand-name">Uttarakhand Travels</h1>
 
                     <!-- Description -->
                     <p class="brand-desc">
-                        Welcome back to the Hotel Admin Portal. Sign in to securely manage hotel bookings,
-                        room availability, guest details, packages, testimonials, galleries, and website
-                        content—all from one powerful and easy-to-use dashboard.
+                        Find your stay, plan a Himalayan escape, and keep every trip organized in one place.
                     </p>
 
                     <!-- Features -->

@@ -1,303 +1,78 @@
 @extends('layouts.user')
 
-@section('title','Package Details')
+@section('title', 'Package Booking Details')
 
 @section('content')
-
-<div class="dashboard-container">
+    @php
+        $statusClass = match (strtolower((string) $booking->booking_status)) {
+            'confirmed', 'completed' => 'text-bg-success',
+            'pending' => 'text-bg-warning',
+            'cancelled', 'failed' => 'text-bg-danger',
+            default => 'text-bg-secondary',
+        };
+        $paymentStatusClass = match (strtolower((string) $booking->payment_status)) {
+            'paid', 'completed' => 'text-bg-success',
+            'pending' => 'text-bg-warning',
+            'failed', 'refunded' => 'text-bg-danger',
+            default => 'text-bg-secondary',
+        };
+    @endphp
 
     <div class="page-header">
-
         <div>
-
-            <h2 class="page-title">
-
-                Package Details
-
-            </h2>
-
-            <p class="page-subtitle">
-
-                View your selected package details.
-
-            </p>
-
+            <p class="page-subtitle mb-1">Tour reservation</p>
+            <h1 class="page-title">{{ $booking->booking_no ?: 'Booking #'.$booking->id }}</h1>
         </div>
-
         <div class="page-actions">
-
-            <a href="{{ route('user.packages') }}"
-               class="btn btn-outline-secondary">
-
-                <i class="fa-solid fa-arrow-left"></i>
-
-                Back
-
+            <a href="{{ route('user.packages') }}" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to my package bookings
             </a>
-
         </div>
-
     </div>
 
-    <div class="content-card">
-
-        <div class="card-header-custom">
-
-            <h5>
-
-                <i class="fa-solid fa-suitcase"></i>
-
-                {{ $package->package_name }}
-
-            </h5>
-
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <section class="content-card h-100">
+                @if ($package->thumbnail)
+                    <img src="{{ asset('uploads/packages/'.$package->thumbnail) }}" class="booking-detail-image" alt="{{ $package->package_name }}">
+                @else
+                    <div class="booking-detail-placeholder"><i class="fa-solid fa-suitcase-rolling"></i></div>
+                @endif
+                <div class="card-body-custom">
+                    <span class="text-muted small">Booked package</span>
+                    <h2 class="h4 mt-1">{{ $package->package_name }}</h2>
+                    <p class="text-muted mb-0">{{ $package->destination ?: 'Destination not listed' }} · {{ $package->duration ?: 'Duration not listed' }}</p>
+                </div>
+            </section>
         </div>
-
-        <div class="card-body-custom">
-
-            <div class="row">
-
-                <div class="col-lg-5">
-
-                    @if($package->featured_image)
-
-                        <img src="{{ asset('uploads/packages/'.$package->featured_image) }}"
-                             class="img-fluid rounded shadow"
-                             style="width:100%;height:320px;object-fit:cover;">
-
-                    @else
-
-                        <img src="https://via.placeholder.com/600x400?text=Package"
-                             class="img-fluid rounded shadow">
-
-                    @endif
-
+        <div class="col-lg-7">
+            <section class="content-card h-100">
+                <div class="card-header-custom">
+                    <h2 class="h5 mb-0">Your trip</h2>
+                    <span class="badge rounded-pill {{ $statusClass }}">{{ str()->headline($booking->booking_status ?: 'Unknown') }}</span>
                 </div>
-
-                <div class="col-lg-7">
-
-                    <table class="table table-bordered">
-
-                        <tr>
-
-                            <th width="220">
-
-                                Package Name
-
-                            </th>
-
-                            <td>
-
-                                {{ $package->package_name }}
-
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <th>
-
-                                Duration
-
-                            </th>
-
-                            <td>
-
-                                {{ $package->duration ?? '-' }}
-
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <th>
-
-                                Price
-
-                            </th>
-
-                            <td>
-
-                                ₹{{ number_format($package->price) }}
-
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <th>
-
-                                Destination
-
-                            </th>
-
-                            <td>
-
-                                {{ $package->destination ?? '-' }}
-
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <th>
-
-                                Start Date
-
-                            </th>
-
-                            <td>
-
-                                {{ $package->start_date ?? '-' }}
-
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <th>
-
-                                End Date
-
-                            </th>
-
-                            <td>
-
-                                {{ $package->end_date ?? '-' }}
-
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <th>
-
-                                Available Seats
-
-                            </th>
-
-                            <td>
-
-                                {{ $package->available_seats ?? '-' }}
-
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <th>
-
-                                Status
-
-                            </th>
-
-                            <td>
-
-                                @if($package->status)
-
-                                    <span class="badge bg-success">
-
-                                        Active
-
-                                    </span>
-
-                                @else
-
-                                    <span class="badge bg-danger">
-
-                                        Inactive
-
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-                        </tr>
-
-                        <tr>
-
-                            <th>
-
-                                Created At
-
-                            </th>
-
-                            <td>
-
-                                {{ $package->created_at->format('d M Y h:i A') }}
-
-                            </td>
-
-                        </tr>
-
-                    </table>
-
+                <div class="card-body-custom">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5 text-muted">Travel date</dt>
+                        <dd class="col-sm-7">{{ $booking->travel_date?->format('d M Y') ?? '—' }}</dd>
+                        <dt class="col-sm-5 text-muted">Travelers</dt>
+                        <dd class="col-sm-7">{{ $booking->guest ?? '—' }}</dd>
+                        <dt class="col-sm-5 text-muted">Payment status</dt>
+                        <dd class="col-sm-7"><span class="badge rounded-pill {{ $paymentStatusClass }}">{{ str()->headline($booking->payment_status ?: 'Unknown') }}</span></dd>
+                        <dt class="col-sm-5 text-muted">Total</dt>
+                        <dd class="col-sm-7 fw-bold">{{ $booking->currency ?: 'INR' }} {{ number_format((float) ($booking->grand_total ?? $booking->total_amount ?? 0), 2) }}</dd>
+                        <dt class="col-sm-5 text-muted">Booked on</dt>
+                        <dd class="col-sm-7">{{ $booking->created_at?->format('d M Y, h:i A') ?? '—' }}</dd>
+                    </dl>
                 </div>
-
-            </div>
-
-            <hr>
-
-            <h5>
-
-                Package Description
-
-            </h5>
-
-            <div class="border rounded p-4 bg-light">
-
-                {!! nl2br(e($package->description ?? 'No Description Available')) !!}
-
-            </div>
-
-            @if(!empty($package->includes))
-
-                <hr>
-
-                <h5>
-
-                    Package Includes
-
-                </h5>
-
-                <div class="border rounded p-4 bg-light">
-
-                    {!! nl2br(e($package->includes)) !!}
-
-                </div>
-
-            @endif
-
-            @if(!empty($package->excludes))
-
-                <hr>
-
-                <h5>
-
-                    Package Excludes
-
-                </h5>
-
-                <div class="border rounded p-4 bg-light">
-
-                    {!! nl2br(e($package->excludes)) !!}
-
-                </div>
-
-            @endif
-
+            </section>
         </div>
-
     </div>
 
-</div>
-
+    @if ($package->description)
+        <section class="content-card mt-4">
+            <div class="card-header-custom"><h2 class="h5 mb-0">About this package</h2></div>
+            <div class="card-body-custom">{{ $package->description }}</div>
+        </section>
+    @endif
 @endsection

@@ -24,6 +24,9 @@ class Booking extends Model
         'taxable_amount',
         'gst_percentage',
         'gst_amount',
+        'gst_category',
+        'gst_breakdown',
+        'checkout_token',
         'grand_total',
         'currency',
         'payment_status',
@@ -38,6 +41,7 @@ class Booking extends Model
         'taxable_amount' => 'decimal:2',
         'gst_percentage' => 'decimal:2',
         'gst_amount' => 'decimal:2',
+        'gst_breakdown' => 'array',
         'grand_total' => 'decimal:2',
     ];
 

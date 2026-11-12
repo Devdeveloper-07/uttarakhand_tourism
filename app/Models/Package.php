@@ -20,6 +20,8 @@ class Package extends Model
         'price',
 
         'discount_price',
+        'gst_category',
+        'gst_percentage',
 
         'max_person',
 
@@ -45,9 +47,9 @@ class Package extends Model
 
         'status'=>'boolean',
 
-        'price'=>'decimal:2',
-
-        'discount_price'=>'decimal:2'
+        'price' => 'decimal:2',
+        'discount_price' => 'decimal:2',
+        'gst_percentage' => 'decimal:2',
 
     ];
 

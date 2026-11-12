@@ -152,6 +152,11 @@ public function hotels(Request $request)
 public function hotelDetails($id)
 {
     $hotel = Hotel::findOrFail($id);
+    $hotel->load(['rooms' => fn ($query) => $query
+        ->where('status', true)
+        ->where('available_rooms', '>', 0)
+        ->with('roomType')]);
+    $hasRoomInventory = $hotel->rooms()->where('status', true)->exists();
 
     // Pehle same city ke hotels dhoondho
     $relatedHotels = Hotel::where('id', '!=', $hotel->id)
@@ -173,7 +178,7 @@ public function hotelDetails($id)
             ->get();
     }
 
-    return view('frontend.hotels.show', compact('hotel', 'relatedHotels'));
+    return view('frontend.hotels.show', compact('hotel', 'relatedHotels', 'hasRoomInventory'));
 }
 
     /*

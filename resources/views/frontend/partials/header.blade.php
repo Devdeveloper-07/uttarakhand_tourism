@@ -1,76 +1,29 @@
-<header class="site-header">
-    <nav class="navbar navbar-expand-lg">
+<header class="travel-header">
+    <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
         <div class="container">
-            <!-- Logo -->
-            <a class="navbar-brand" href="{{ route('home') }}">
-                <div class="brand-wrapper">
-                    <img src="{{ asset('assets/logo/logo.png') }}"
-                         alt="Uttarakhand Tourism Logo"
-                         class="brand-logo">
-                </div>
+            <a class="travel-brand" href="{{ route('home') }}" aria-label="Uttarakhand Travels home">
+                <span class="travel-brand-mark"><i class="bi bi-signpost-split-fill"></i></span>
+                <span><strong>Uttarakhand</strong><small>TRAVELS</small></span>
             </a>
-
-            <!-- Mobile Toggle -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-label="Toggle navigation">
+            <button class="navbar-toggler travel-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#travelNav" aria-controls="travelNav" aria-expanded="false" aria-label="Open navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
-            <!-- Navigation -->
-            <div class="collapse navbar-collapse" id="navbar">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
-                            <i class="fa-solid fa-house"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('hotels') ? 'active' : '' }}" href="{{ route('hotels') }}">
-                            <i class="fa-solid fa-hotel"></i> Hotels
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('packages') ? 'active' : '' }}" href="{{ route('packages') }}">
-                            <i class="fa-solid fa-suitcase-rolling"></i> Packages
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('gallery') ? 'active' : '' }}" href="{{ route('gallery') }}">
-                            <i class="fa-solid fa-images"></i> Gallery
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">
-                            <i class="fa-solid fa-circle-info"></i> About
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">
-                            <i class="fa-solid fa-envelope"></i> Contact
-                        </a>
-                    </li>
+            <div class="collapse navbar-collapse" id="travelNav">
+                <ul class="navbar-nav mx-auto travel-nav-links">
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('hotels*','hotel.*') ? 'active' : '' }}" href="{{ route('hotels') }}">Hotels</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('packages*','package.*') ? 'active' : '' }}" href="{{ route('packages') }}">Tour packages</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('gallery') ? 'active' : '' }}" href="{{ route('gallery') }}">Gallery</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">About</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Contact</a></li>
                 </ul>
-
-                <!-- Auth Buttons -->
-                <div class="nav-auth">
+                <div class="travel-nav-actions">
                     @guest
-                        <a href="{{ route('login') }}" class="btn btn-nav-outline">
-                            <i class="fa-solid fa-user"></i> Login
-                        </a>
-                        <a href="{{ route('register') }}" class="btn btn-nav-primary">
-                            <i class="fa-solid fa-user-plus"></i> Register
-                        </a>
+                        <a href="{{ route('login') }}" class="travel-login">Log in</a>
+                        <a href="{{ route('register') }}" class="btn travel-cta">Create account</a>
                     @endguest
-
                     @auth
-                        @if(auth()->user()->role=='admin')
-                            <a href="{{ route('admin.dashboard') }}" class="btn btn-nav-primary">
-                                <i class="fa-solid fa-gauge-high"></i> Dashboard
-                            </a>
-                        @else
-                            <a href="{{ route('user.dashboard') }}" class="btn btn-nav-primary">
-                                <i class="fa-solid fa-gauge-high"></i> Dashboard
-                            </a>
-                        @endif
+                        <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('user.dashboard') }}" class="btn travel-cta"><i class="bi bi-person-circle me-1"></i> My trips</a>
                     @endauth
                 </div>
             </div>

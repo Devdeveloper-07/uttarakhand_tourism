@@ -1,0 +1,36 @@
+﻿body.user-dashboard{--dash-line:#e2e8f0;background:#f3f6fa;color:#172b40;font-family:Inter,"Segoe UI",sans-serif}
+.user-dashboard .wrapper{min-height:100vh;background:#f3f6fa}
+.user-dashboard .user-sidebar{width:270px;background:linear-gradient(180deg,#102c47,#173a59);box-shadow:8px 0 28px rgba(16,44,71,.08)}
+.user-dashboard .sidebar-brand{min-height:82px;border-color:rgba(255,255,255,.1)}
+.user-dashboard .welcome-logo{max-width:44px;max-height:44px;object-fit:contain}
+.user-dashboard .sidebar-nav{padding:16px 12px}
+.user-dashboard .sidebar-nav .nav-label{color:#95aac0;letter-spacing:.12em;font-size:.68rem}
+.user-dashboard .sidebar-nav li a{min-height:44px;border-radius:10px;color:#d4e0ec}
+.user-dashboard .sidebar-nav li a:hover,.user-dashboard .sidebar-nav li.active a{color:#fff;background:rgba(255,255,255,.12)}
+.user-dashboard .sidebar-nav li.active a{box-shadow:inset 3px 0 #f0b65c}
+.user-dashboard .main{margin-left:270px}
+.user-dashboard .user-navbar{height:74px;border-bottom:1px solid var(--dash-line);background:rgba(255,255,255,.96);box-shadow:0 3px 15px rgba(23,43,64,.035)}
+.user-dashboard .content{min-width:0;padding:28px clamp(18px,3vw,38px);background:#f3f6fa}
+.user-dashboard .page-title,.user-dashboard h1,.user-dashboard h2{color:#172b40;letter-spacing:-.035em}
+.user-dashboard .page-subtitle{color:#718096}
+.user-dashboard .stat-card,.user-dashboard .content-card,.user-dashboard .welcome-card,.user-dashboard .card,.user-dashboard .table-responsive{border:1px solid var(--dash-line);border-radius:15px;background:#fff;box-shadow:0 7px 24px rgba(23,43,64,.045)}
+.user-dashboard .stat-card{padding:20px}
+.user-dashboard .stat-card:hover{transform:translateY(-2px);box-shadow:0 13px 30px rgba(23,43,64,.08)}
+.user-dashboard .stat-number{color:#183a5c;font-weight:750}
+.user-dashboard .welcome-card{padding:26px;color:#fff;background:linear-gradient(112deg,#173a5a,#24628a)}
+.user-dashboard .welcome-card h3,.user-dashboard .welcome-card p{color:#fff}
+.user-dashboard .content-card{overflow:hidden}
+.user-dashboard .table{margin-bottom:0;color:#33465a}
+.user-dashboard .table thead th{padding:14px 16px;border-bottom:1px solid #dfe7ef;color:#62758a;background:#f7f9fc;font-size:.73rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.user-dashboard .table tbody td{padding:14px 16px;border-color:#edf1f5;vertical-align:middle}
+.user-dashboard .table tbody tr:hover{background:#f8fbfe}
+.user-dashboard .btn{border-radius:9px;font-weight:600}
+.user-dashboard .btn-primary{border-color:#2563a6;background:#2563a6}
+.user-dashboard .form-control,.user-dashboard .form-select{min-height:43px;border-color:#dce4ec;border-radius:9px}
+.user-dashboard .form-control:focus,.user-dashboard .form-select:focus{border-color:#75a5d4;box-shadow:0 0 0 3px rgba(37,99,166,.11)}
+.user-dashboard label,.user-dashboard .form-label{color:#465a6d;font-weight:600}
+.user-dashboard .badge{border-radius:999px;padding:.45em .7em}
+.user-dashboard .dropdown-menu{border:1px solid var(--dash-line);border-radius:12px;box-shadow:0 14px 34px rgba(23,43,64,.12)}
+.user-dashboard .sidebar-toggle-btn{border:1px solid var(--dash-line);border-radius:9px;color:#33536f;background:#fff}
+.user-dashboard .pagination .active .page-link{border-color:#2563a6;background:#2563a6}
+@media(max-width:991.98px){.user-dashboard .user-sidebar{transform:translateX(-100%);z-index:1050}.user-dashboard .user-sidebar.active{transform:translateX(0)}.user-dashboard .main,.user-dashboard .wrapper.sidebar-collapsed .main{margin-left:0}.user-dashboard .content{padding:20px 16px}}

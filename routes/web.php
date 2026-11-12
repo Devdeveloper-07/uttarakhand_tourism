@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\BookingController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\BookingPaymentController;
@@ -38,6 +40,9 @@ Route::post('/package/{package}/book', [BookingPaymentController::class, 'startP
     ->name('package.booking.start');
 Route::post('/payments/{payment}/verify', [BookingPaymentController::class, 'verify'])
     ->name('payments.verify');
+Route::get('/payments/{payment}/invoice', [BookingPaymentController::class, 'invoice'])
+    ->middleware('signed')
+    ->name('payments.invoice');
 
 Route::get('/gallery',[HomeController::class,'gallery'])->name('gallery');
 
@@ -71,6 +76,14 @@ Route::middleware(['auth', 'admin'])
 
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
+
+        Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
+        Route::get('/payments/{payment}/invoice', [BookingPaymentController::class, 'invoice'])->name('payments.invoice');
+        Route::get('/gst-settings', [\App\Http\Controllers\Admin\GstSettingsController::class, 'index'])->name('gst-settings.index');
+        Route::put('/gst-settings/hotel-slabs', [\App\Http\Controllers\Admin\GstSettingsController::class, 'updateHotelSlabs'])->name('gst-settings.hotel-slabs.update');
 
         Route::resource('hotels', HotelController::class);
         Route::resource('rooms', RoomController::class);
