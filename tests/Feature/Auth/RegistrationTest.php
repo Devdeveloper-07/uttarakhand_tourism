@@ -21,11 +21,37 @@ class RegistrationTest extends TestCase
         $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'mobile' => '9876543210',
+            'gender' => 'Other',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('user.dashboard', absolute: false));
+    }
+
+    public function test_registration_during_a_booking_returns_to_that_booking(): void
+    {
+        $response = $this->withSession([
+            'booking.pending' => [
+                'type' => 'package',
+                'id' => 42,
+                'form' => [
+                    'travel_date' => now()->addDays(10)->toDateString(),
+                    'travelers' => 2,
+                ],
+            ],
+        ])->post('/register', [
+            'name' => 'Booking User',
+            'email' => 'booking-user@example.com',
+            'mobile' => '9876543210',
+            'gender' => 'Other',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('package.details', 42, absolute: false));
     }
 }

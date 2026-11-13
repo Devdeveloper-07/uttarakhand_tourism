@@ -13,6 +13,8 @@ use App\Models\RoomType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as ClientRequest;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
@@ -59,6 +61,465 @@ class BookingPaymentTest extends TestCase
             'featured' => fn ($table) => $table->boolean('featured')->default(false),
             'status' => fn ($table) => $table->boolean('status')->default(true),
         ]);
+
+        $this->actingAs(User::factory()->create());
+    }
+
+    public function test_guest_hotel_booking_returns_to_form_with_saved_selection_and_account_details(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Login return hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 200,
+            'status' => true,
+        ]);
+        $roomType = RoomType::create(['name' => 'Standard', 'status' => true]);
+        $room = Room::create([
+            'hotel_id' => $hotel->id,
+            'room_name' => 'Garden room',
+            'room_number' => 'LOGIN-ROOM-1',
+            'room_type_id' => $roomType->id,
+            'capacity' => 2,
+            'total_rooms' => 2,
+            'available_rooms' => 2,
+            'price_per_night' => 1500,
+            'status' => true,
+        ]);
+        $customer = User::factory()->create([
+            'name' => 'Akash Negi',
+            'email' => 'akash@example.com',
+        ]);
+        $customer->detail()->create(['mobile' => '9876543210', 'status' => true]);
+        $checkIn = now()->addDays(8)->toDateString();
+        $checkOut = now()->addDays(10)->toDateString();
+        $checkoutToken = (string) \Illuminate\Support\Str::uuid();
+
+        Auth::logout();
+        $this->post(route('hotel.booking.start', $hotel), [
+            'check_in' => $checkIn,
+            'check_out' => $checkOut,
+            'guests' => 2,
+            'rooms' => 1,
+            'room_allocations' => [$room->id => 1],
+            'checkout_token' => $checkoutToken,
+        ])->assertRedirect(route('login'))
+            ->assertSessionHas('booking.pending.form.check_in', $checkIn);
+
+        $this->post(route('login'), [
+            'email' => $customer->email,
+            'password' => 'password',
+        ])->assertRedirect(route('hotel.details', $hotel->id));
+
+        $this->get(route('hotel.details', $hotel->id))
+            ->assertOk()
+            ->assertSee('value="'.$checkIn.'"', false)
+            ->assertSee('value="'.$checkOut.'"', false)
+            ->assertSee('value="'.$checkoutToken.'"', false)
+            ->assertSee('value="2" selected', false)
+            ->assertSee('name="room_allocations['.$room->id.']"', false)
+            ->assertSee('value="1"', false)
+            ->assertSee('value="Akash Negi"', false)
+            ->assertSee('value="9876543210"', false)
+            ->assertSee('value="akash@example.com"', false);
+
+        Http::fake([
+            'api.razorpay.com/v1/orders' => Http::response([
+                'id' => 'order_login_return_hotel',
+                'amount' => 315000,
+                'currency' => 'INR',
+            ]),
+        ]);
+        $this->post(route('hotel.booking.start', $hotel), [
+            'check_in' => $checkIn,
+            'check_out' => $checkOut,
+            'guests' => 2,
+            'rooms' => 1,
+            'room_allocations' => [$room->id => 1],
+            'name' => 'Akash Negi',
+            'phone' => '9876543210',
+            'email' => 'akash@example.com',
+            'checkout_token' => $checkoutToken,
+        ])->assertOk()->assertViewIs('frontend.payment.checkout');
+        $this->assertDatabaseHas('bookings', [
+            'item_type' => 'hotel',
+            'item_id' => $hotel->id,
+            'user_id' => $customer->id,
+        ]);
+        $booking = Booking::query()->where('item_id', $hotel->id)->firstOrFail();
+        $this->assertSame($checkIn, $booking->check_in->toDateString());
+        $this->assertSame($checkOut, $booking->check_out->toDateString());
+        $this->assertFalse(session()->has('booking.pending'));
+    }
+
+    public function test_guest_package_booking_returns_to_form_with_saved_selection_and_account_details(): void
+    {
+        $package = Package::create([
+            'package_name' => 'Login return package',
+            'destination' => 'Test destination',
+            'duration' => 3,
+            'price' => 1000,
+            'discount_price' => 800,
+            'max_person' => 8,
+            'description' => 'Test package description',
+            'status' => true,
+        ]);
+        $customer = User::factory()->create([
+            'name' => 'Akash Negi',
+            'email' => 'akash-package@example.com',
+        ]);
+        $customer->detail()->create(['mobile' => '9876543210', 'status' => true]);
+        $travelDate = now()->addDays(12)->toDateString();
+        $checkoutToken = (string) \Illuminate\Support\Str::uuid();
+
+        Auth::logout();
+        $this->post(route('package.booking.start', $package), [
+            'travel_date' => $travelDate,
+            'travelers' => 3,
+            'checkout_token' => $checkoutToken,
+        ])->assertRedirect(route('login'))
+            ->assertSessionHas('booking.pending.form.travel_date', $travelDate);
+
+        $this->post(route('login'), [
+            'email' => $customer->email,
+            'password' => 'password',
+        ])->assertRedirect(route('package.details', $package->id));
+
+        $this->get(route('package.details', $package->id))
+            ->assertOk()
+            ->assertSee('value="'.$travelDate.'"', false)
+            ->assertSee('value="'.$checkoutToken.'"', false)
+            ->assertSee('value="3"', false)
+            ->assertSee('Base Amount (before GST)')
+            ->assertSee('value="Akash Negi"', false)
+            ->assertSee('value="9876543210"', false)
+            ->assertSee('value="akash-package@example.com"', false);
+
+        Http::fake([
+            'api.razorpay.com/v1/orders' => Http::response([
+                'id' => 'order_login_return_package',
+                'amount' => 283200,
+                'currency' => 'INR',
+            ]),
+        ]);
+        $this->post(route('package.booking.start', $package), [
+            'travel_date' => $travelDate,
+            'travelers' => 3,
+            'name' => 'Akash Negi',
+            'phone' => '9876543210',
+            'email' => 'akash-package@example.com',
+            'checkout_token' => $checkoutToken,
+        ])->assertOk()->assertViewIs('frontend.payment.checkout');
+        $this->assertDatabaseHas('bookings', [
+            'item_type' => 'package',
+            'item_id' => $package->id,
+            'user_id' => $customer->id,
+            'guest' => 3,
+        ]);
+        $booking = Booking::query()->where('item_id', $package->id)->firstOrFail();
+        $this->assertSame($travelDate, $booking->travel_date->toDateString());
+        $this->assertFalse(session()->has('booking.pending'));
+    }
+
+    public function test_hotel_booking_phone_stays_editable_when_profile_mobile_is_missing(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Missing mobile hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 200,
+            'status' => true,
+        ]);
+        $customer = User::factory()->create([
+            'name' => 'No Mobile User',
+            'email' => 'no-mobile@example.com',
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('hotel.details', $hotel->id))
+            ->assertOk()
+            ->assertSee('id="mmtGuestPhone" value=""', false)
+            ->assertSee('id="mmtGuestName" value="No Mobile User"', false)
+            ->assertSee('id="mmtGuestEmail" value="no-mobile@example.com"', false);
+    }
+
+    public function test_hotel_catalog_filters_and_sorts_by_starting_price_and_hides_inactive_details(): void
+    {
+        $expensive = Hotel::create([
+            'hotel_name' => 'Expensive stay',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel',
+            'starting_price' => 900,
+            'status' => true,
+        ]);
+        $affordable = Hotel::create([
+            'hotel_name' => 'Affordable stay',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel',
+            'starting_price' => 300,
+            'status' => true,
+        ]);
+        $inactive = Hotel::create([
+            'hotel_name' => 'Inactive stay',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel',
+            'starting_price' => 100,
+            'status' => false,
+        ]);
+
+        $this->get(route('hotels', ['sort' => 'price_low']))
+            ->assertOk()
+            ->assertViewHas('hotels', fn ($hotels) => $hotels->getCollection()->modelKeys() === [$affordable->id, $expensive->id]);
+        $this->get(route('hotels', ['sort' => 'price_high']))
+            ->assertOk()
+            ->assertViewHas('hotels', fn ($hotels) => $hotels->getCollection()->modelKeys() === [$expensive->id, $affordable->id]);
+        $this->get(route('hotels', ['price' => 500]))
+            ->assertOk()
+            ->assertViewHas('hotels', fn ($hotels) => $hotels->getCollection()->modelKeys() === [$affordable->id]);
+        $this->get(route('hotel.details', $affordable->id))
+            ->assertOk()
+            ->assertDontSee('29% OFF')
+            ->assertDontSee('mmtOldPrice');
+        $this->get(route('hotel.details', $inactive->id))->assertNotFound();
+    }
+
+    public function test_inactive_package_details_are_not_publicly_accessible(): void
+    {
+        $package = Package::create([
+            'package_name' => 'Inactive package',
+            'destination' => 'Test destination',
+            'duration' => 3,
+            'price' => 1000,
+            'discount_price' => null,
+            'max_person' => 8,
+            'description' => 'Test package description',
+            'status' => false,
+        ]);
+
+        $this->get(route('package.details', $package->id))->assertNotFound();
+    }
+
+    public function test_checkout_token_cannot_resume_another_users_checkout(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Owned checkout hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 200,
+            'status' => true,
+        ]);
+        $token = (string) \Illuminate\Support\Str::uuid();
+        $booking = Booking::create([
+            'user_id' => auth()->id(),
+            'booking_no' => 'BK-OWNED-CHECKOUT',
+            'checkout_token' => $token,
+            'item_type' => 'hotel',
+            'item_id' => $hotel->id,
+            'check_in' => now()->addDays(4)->toDateString(),
+            'check_out' => now()->addDays(5)->toDateString(),
+            'guest' => 1,
+            'room_count' => 1,
+            'total_amount' => 200,
+            'grand_total' => 200,
+            'currency' => 'INR',
+            'payment_status' => 'pending',
+            'booking_status' => 'pending',
+        ]);
+        Payment::create([
+            'booking_id' => $booking->id,
+            'user_id' => auth()->id(),
+            'gateway_name' => 'razorpay',
+            'gateway_order_id' => 'order_owned_checkout',
+            'currency' => 'INR',
+            'amount' => 200,
+            'payment_status' => 'created',
+        ]);
+        $otherCustomer = User::factory()->create();
+
+        $this->actingAs($otherCustomer)
+            ->post(route('hotel.booking.start', $hotel), [
+                'check_in' => now()->addDays(4)->toDateString(),
+                'check_out' => now()->addDays(5)->toDateString(),
+                'guests' => 1,
+                'rooms' => 1,
+                'name' => 'Another customer',
+                'phone' => '9876543210',
+                'email' => $otherCustomer->email,
+                'checkout_token' => $token,
+            ])->assertNotFound();
+    }
+
+    public function test_hotel_update_rejects_an_invalid_thumbnail_upload(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Upload validation hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 200,
+            'status' => true,
+        ]);
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->put(route('admin.hotels.update', $hotel), [
+                'hotel_name' => 'Upload validation hotel',
+                'location' => 'Test location',
+                'city' => 'Test city',
+                'description' => 'Test hotel description',
+                'starting_price' => 200,
+                'thumbnail' => UploadedFile::fake()->create('not-an-image.txt', 4, 'text/plain'),
+            ])
+            ->assertSessionHasErrors('thumbnail');
+    }
+
+    public function test_admin_cannot_delete_hotel_or_package_booking_history(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Historical hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 200,
+            'status' => true,
+        ]);
+        $package = Package::create([
+            'package_name' => 'Historical package',
+            'destination' => 'Test destination',
+            'duration' => 3,
+            'price' => 1000,
+            'discount_price' => null,
+            'max_person' => 8,
+            'description' => 'Test package description',
+            'status' => true,
+        ]);
+        Booking::create([
+            'booking_no' => 'BK-HIST-HOTEL',
+            'item_type' => 'hotel',
+            'item_id' => $hotel->id,
+            'guest' => 1,
+            'room_count' => 1,
+            'total_amount' => 200,
+            'grand_total' => 200,
+            'currency' => 'INR',
+            'payment_status' => 'paid',
+            'booking_status' => 'confirmed',
+        ]);
+        Booking::create([
+            'booking_no' => 'BK-HIST-PACKAGE',
+            'item_type' => 'package',
+            'item_id' => $package->id,
+            'guest' => 1,
+            'room_count' => 1,
+            'total_amount' => 1000,
+            'grand_total' => 1180,
+            'currency' => 'INR',
+            'payment_status' => 'paid',
+            'booking_status' => 'confirmed',
+        ]);
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.hotels.destroy', $hotel))
+            ->assertSessionHasErrors('hotel');
+        $this->delete(route('admin.packages.destroy', $package))
+            ->assertSessionHasErrors('package');
+
+        $this->assertDatabaseHas('hotels', ['id' => $hotel->id]);
+        $this->assertDatabaseHas('packages', ['id' => $package->id]);
+    }
+
+    public function test_admin_can_create_a_customer_account_without_assigning_admin_role(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.create'))
+            ->assertOk()
+            ->assertSee('Create User');
+
+        $this->post(route('admin.users.store'), [
+            'name' => 'Created Customer',
+            'email' => 'created-customer@example.com',
+            'mobile' => '9876543210',
+            'gender' => 'Other',
+            'password' => 'TourPassword-123!',
+            'password_confirmation' => 'TourPassword-123!',
+            'status' => '1',
+            'role' => 'admin',
+        ])->assertRedirect(route('admin.users.index'));
+
+        $customer = User::query()->where('email', 'created-customer@example.com')->firstOrFail();
+        $this->assertSame('user', $customer->role);
+        $this->assertDatabaseHas('user_details', [
+            'user_id' => $customer->id,
+            'mobile' => '9876543210',
+            'gender' => 'Other',
+            'status' => 1,
+        ]);
+    }
+
+    public function test_admin_user_management_cannot_change_or_remove_an_admin_account(): void
+    {
+        $otherAdmin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.edit', $otherAdmin))
+            ->assertNotFound();
+        $this->delete(route('admin.users.destroy', $otherAdmin))->assertNotFound();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $otherAdmin->id,
+            'role' => 'admin',
+        ]);
+    }
+
+    public function test_admin_cannot_delete_a_room_type_that_is_in_use(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Room type hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 200,
+            'status' => true,
+        ]);
+        $roomType = RoomType::create(['name' => 'In-use type', 'status' => true]);
+        $room = Room::create([
+            'hotel_id' => $hotel->id,
+            'room_name' => 'In-use room',
+            'room_number' => 'TYPE-ROOM-1',
+            'room_type_id' => $roomType->id,
+            'capacity' => 2,
+            'total_rooms' => 1,
+            'available_rooms' => 1,
+            'price_per_night' => 200,
+            'status' => true,
+        ]);
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.room-types.destroy', $roomType))
+            ->assertSessionHasErrors('room_type');
+
+        $this->assertDatabaseHas('room_types', ['id' => $roomType->id]);
+        $this->assertDatabaseHas('rooms', ['id' => $room->id]);
     }
 
     public function test_hotel_checkout_uses_server_calculated_stay_total(): void
@@ -232,6 +693,130 @@ class BookingPaymentTest extends TestCase
             'gateway_payment_id' => 'pay_verify_test',
             'payment_status' => 'paid',
             'payment_method' => 'upi',
+        ]);
+    }
+
+    public function test_authorized_payment_is_captured_before_confirming_the_booking(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Capture hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 200,
+            'status' => true,
+        ]);
+        $booking = Booking::create([
+            'booking_no' => 'BK-CAPTURE-TEST',
+            'item_type' => 'hotel',
+            'item_id' => $hotel->id,
+            'guest' => 1,
+            'room_count' => 1,
+            'total_amount' => 200,
+            'grand_total' => 200,
+            'currency' => 'INR',
+            'payment_status' => 'pending',
+            'booking_status' => 'pending',
+        ]);
+        $payment = Payment::create([
+            'booking_id' => $booking->id,
+            'gateway_name' => 'razorpay',
+            'gateway_order_id' => 'order_capture_test',
+            'currency' => 'INR',
+            'amount' => 200,
+            'payment_status' => 'created',
+        ]);
+        $paymentId = 'pay_capture_test';
+        $signature = hash_hmac('sha256', 'order_capture_test|'.$paymentId, 'test_secret');
+
+        Http::fake([
+            'api.razorpay.com/v1/payments/'.$paymentId => Http::response([
+                'id' => $paymentId,
+                'order_id' => 'order_capture_test',
+                'amount' => 20000,
+                'currency' => 'INR',
+                'status' => 'authorized',
+                'method' => 'upi',
+            ]),
+            'api.razorpay.com/v1/payments/'.$paymentId.'/capture' => Http::response([
+                'id' => $paymentId,
+                'order_id' => 'order_capture_test',
+                'amount' => 20000,
+                'currency' => 'INR',
+                'status' => 'captured',
+                'method' => 'upi',
+            ]),
+        ]);
+
+        $this->post(route('payments.verify', $payment), [
+            'razorpay_payment_id' => $paymentId,
+            'razorpay_order_id' => 'order_capture_test',
+            'razorpay_signature' => $signature,
+        ])->assertOk()->assertViewHas('status', 'success');
+
+        Http::assertSent(fn ($request) => str_ends_with($request->url(), '/payments/'.$paymentId.'/capture')
+            && $request['amount'] === 20000
+            && $request['currency'] === 'INR');
+        $this->assertDatabaseHas('bookings', [
+            'id' => $booking->id,
+            'payment_status' => 'paid',
+            'booking_status' => 'confirmed',
+        ]);
+    }
+
+    public function test_gateway_lookup_connection_failure_leaves_payment_pending(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Pending verification hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 200,
+            'status' => true,
+        ]);
+        $booking = Booking::create([
+            'booking_no' => 'BK-VERIFY-PENDING',
+            'item_type' => 'hotel',
+            'item_id' => $hotel->id,
+            'guest' => 1,
+            'room_count' => 1,
+            'total_amount' => 200,
+            'grand_total' => 200,
+            'currency' => 'INR',
+            'payment_status' => 'pending',
+            'booking_status' => 'pending',
+        ]);
+        $payment = Payment::create([
+            'booking_id' => $booking->id,
+            'gateway_name' => 'razorpay',
+            'gateway_order_id' => 'order_verify_pending',
+            'currency' => 'INR',
+            'amount' => 200,
+            'payment_status' => 'created',
+        ]);
+        $paymentId = 'pay_verify_pending';
+        $signature = hash_hmac('sha256', 'order_verify_pending|'.$paymentId, 'test_secret');
+
+        Http::fake(function () {
+            throw new \Illuminate\Http\Client\ConnectionException('Test connection failure.');
+        });
+
+        $this->post(route('payments.verify', $payment), [
+            'razorpay_payment_id' => $paymentId,
+            'razorpay_order_id' => 'order_verify_pending',
+            'razorpay_signature' => $signature,
+        ])->assertStatus(202)->assertViewHas('status', 'pending');
+
+        $this->assertDatabaseHas('bookings', [
+            'id' => $booking->id,
+            'payment_status' => 'pending',
+            'booking_status' => 'pending',
+        ]);
+        $this->assertDatabaseHas('payments', [
+            'id' => $payment->id,
+            'payment_status' => 'created',
         ]);
     }
 

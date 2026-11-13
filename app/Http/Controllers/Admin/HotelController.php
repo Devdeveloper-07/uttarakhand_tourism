@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\Hotel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -74,6 +75,7 @@ class HotelController extends Controller
             'city' => 'required',
             'description' => 'required',
             'starting_price' => 'required|numeric',
+            'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $image = $hotel->thumbnail;
@@ -110,6 +112,12 @@ class HotelController extends Controller
 
     public function destroy(Hotel $hotel)
     {
+        if (Booking::query()->where('item_type', 'hotel')->where('item_id', $hotel->id)->exists()) {
+            return back()->withErrors([
+                'hotel' => 'This hotel has booking history and cannot be deleted. Disable it instead.',
+            ]);
+        }
+
         if ($hotel->thumbnail && File::exists(public_path('uploads/hotels/'.$hotel->thumbnail))) {
 
             File::delete(public_path('uploads/hotels/'.$hotel->thumbnail));

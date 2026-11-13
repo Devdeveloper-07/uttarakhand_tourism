@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -152,6 +153,12 @@ class PackageController extends Controller
 
     public function destroy(Package $package)
     {
+        if (Booking::query()->where('item_type', 'package')->where('item_id', $package->id)->exists()) {
+            return back()->withErrors([
+                'package' => 'This package has booking history and cannot be deleted. Disable it instead.',
+            ]);
+        }
+
         if ($package->thumbnail &&
             File::exists(public_path('uploads/packages/' . $package->thumbnail))) {
 

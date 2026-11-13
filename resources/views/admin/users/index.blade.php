@@ -12,6 +12,11 @@
             <h2 class="page-title">Users</h2>
             <p class="page-subtitle">Manage Registered Users</p>
         </div>
+        <div class="page-actions">
+            <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-user-plus me-1"></i> Add User
+            </a>
+        </div>
     </div>
 
     <!-- Success Alert -->

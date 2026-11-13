@@ -28,11 +28,23 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if (auth()->user()->role == 'admin') {
-    return redirect()->route('admin.dashboard');
-}
+        $pendingBooking = $request->session()->get('booking.pending');
 
-return redirect()->route('user.dashboard');
+        if (auth()->user()->role === 'admin') {
+            $request->session()->forget(['booking.pending', 'url.intended']);
+
+            return redirect()->route('admin.dashboard');
+        }
+
+        if (($pendingBooking['type'] ?? null) === 'hotel' && is_numeric($pendingBooking['id'] ?? null)) {
+            return redirect()->route('hotel.details', (int) $pendingBooking['id']);
+        }
+
+        if (($pendingBooking['type'] ?? null) === 'package' && is_numeric($pendingBooking['id'] ?? null)) {
+            return redirect()->route('package.details', (int) $pendingBooking['id']);
+        }
+
+        return redirect()->route('user.dashboard');
     }
 
     /**

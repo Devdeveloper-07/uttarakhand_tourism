@@ -58,6 +58,12 @@ class RoomTypeController extends Controller
 
     public function destroy(RoomType $roomType)
     {
+        if ($roomType->rooms()->exists()) {
+            return back()->withErrors([
+                'room_type' => 'This room type is assigned to room inventory. Reassign or remove those rooms first.',
+            ]);
+        }
+
         $roomType->delete();
 
         return redirect()

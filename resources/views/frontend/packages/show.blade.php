@@ -4,6 +4,14 @@
 
     @section('content')
 
+@php
+    $pendingPackageBooking = session('booking.pending.type') === 'package'
+        && (int) session('booking.pending.id') === (int) $package->id
+        ? session('booking.pending.form', [])
+        : [];
+    $bookingUser = auth()->user();
+@endphp
+
     @php
         $bookingUnitPrice = $package->booking_price;
         $discountPercent = $package->price > 0 && $bookingUnitPrice < $package->price
@@ -536,36 +544,36 @@
                             @endif
                             <form action="{{ route('package.booking.start', $package) }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="checkout_token" value="{{ session('new_checkout_token', old('checkout_token', (string) \Illuminate\Support\Str::uuid())) }}">
+                                <input type="hidden" name="checkout_token" value="{{ session('new_checkout_token', old('checkout_token', data_get($pendingPackageBooking, 'checkout_token', (string) \Illuminate\Support\Str::uuid()))) }}">
                                 <input type="hidden" name="package_id" value="{{ $package->id }}">
 
                                 <div class="form-group">
                                     <label><i class="fa-regular fa-calendar"></i> Travel Date</label>
-                                    <input type="date" class="form-control" name="travel_date" value="{{ old('travel_date') }}" required min="{{ date('Y-m-d') }}">
+                                    <input type="date" class="form-control" name="travel_date" value="{{ old('travel_date', data_get($pendingPackageBooking, 'travel_date')) }}" required min="{{ date('Y-m-d') }}">
                                 </div>
 
                                 <div class="form-group">
                                     <label><i class="fa-solid fa-users"></i> Number of Travelers</label>
                                     <div class="traveler-counter">
                                         <button type="button" class="counter-btn" aria-label="Remove one traveler" onclick="updateTravelers(-1)">-</button>
-                                        <input type="number" name="travelers" value="{{ old('travelers', $initialTravelers) }}" min="1" max="{{ $maxTravelers }}" id="travelerCount" readonly>
+                                        <input type="number" name="travelers" value="{{ old('travelers', data_get($pendingPackageBooking, 'travelers', $initialTravelers)) }}" min="1" max="{{ $maxTravelers }}" id="travelerCount" readonly>
                                         <button type="button" class="counter-btn" aria-label="Add one traveler" onclick="updateTravelers(1)">+</button>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
                                     <label><i class="fa-solid fa-user"></i> Full Name</label>
-                                    <input type="text" class="form-control" name="name" value="{{ old('name') }}" placeholder="Enter your name" maxlength="120" required>
+                                    <input type="text" class="form-control" name="name" value="{{ old('name', $bookingUser?->name ?? '') }}" placeholder="Enter your name" maxlength="120" @auth required @endauth>
                                 </div>
 
                                 <div class="form-group">
                                     <label><i class="fa-solid fa-phone"></i> Phone Number</label>
-                                    <input type="tel" class="form-control" name="phone" value="{{ old('phone') }}" placeholder="+91 98765 43210" maxlength="24" required>
+                                    <input type="tel" class="form-control" name="phone" value="{{ old('phone', $bookingUser?->detail?->mobile ?? '') }}" placeholder="+91 98765 43210" maxlength="24" @auth required @endauth>
                                 </div>
 
                                 <div class="form-group">
                                     <label><i class="fa-solid fa-envelope"></i> Email</label>
-                                    <input type="email" class="form-control" name="email" value="{{ old('email') }}" placeholder="your@email.com" maxlength="255" required>
+                                    <input type="email" class="form-control" name="email" value="{{ old('email', $bookingUser?->email ?? '') }}" placeholder="your@email.com" maxlength="255" @auth required @endauth>
                                 </div>
 
                                 <div class="price-calc">
@@ -584,7 +592,7 @@
                                     </div>
                                     @endif
                                     <div class="calc-row total">
-                                        <span>Total Amount</span>
+                                        <span>Base Amount (before GST)</span>
                                         <span id="calcTotal">₹{{ number_format($bookingUnitPrice * $initialTravelers) }}</span>
                                     </div>
                                 </div>

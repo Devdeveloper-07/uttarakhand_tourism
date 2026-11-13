@@ -174,6 +174,16 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+        $request->session()->regenerate();
+
+        $pendingBooking = $request->session()->get('booking.pending');
+        if (($pendingBooking['type'] ?? null) === 'hotel' && is_numeric($pendingBooking['id'] ?? null)) {
+            return redirect()->route('hotel.details', (int) $pendingBooking['id']);
+        }
+
+        if (($pendingBooking['type'] ?? null) === 'package' && is_numeric($pendingBooking['id'] ?? null)) {
+            return redirect()->route('package.details', (int) $pendingBooking['id']);
+        }
 
         return redirect()->route('user.dashboard');
     }

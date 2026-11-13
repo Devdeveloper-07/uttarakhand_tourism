@@ -117,19 +117,16 @@ public function hotels(Request $request)
 
     // Price filter - price ya starting_price dono check
     if ($request->filled('price')) {
-        $query->where(function ($q) use ($request) {
-            $q->where('starting_price', '<=', $request->price)
-              ->orWhere('starting_price', '<=', $request->price);
-        });
+        $query->where('starting_price', '<=', $request->price);
     }
 
     // Sorting
     switch ($request->get('sort')) {
         case 'price_low':
-            $query->orderByRaw('COALESCE(price, starting_price, 0) ASC');
+            $query->orderBy('starting_price');
             break;
         case 'price_high':
-            $query->orderByRaw('COALESCE(price, starting_price, 0) DESC');
+            $query->orderByDesc('starting_price');
             break;
         case 'rating':
             $query->orderBy('rating', 'DESC');
@@ -183,7 +180,7 @@ public function hotels(Request $request)
 
 public function hotelDetails(Request $request, $id)
 {
-    $hotel = Hotel::findOrFail($id);
+    $hotel = Hotel::where('status', 1)->findOrFail($id);
     $hotel->load(['rooms' => fn ($query) => $query
         ->where('status', true)
         ->with('roomType')]);
@@ -287,7 +284,7 @@ public function hotelAvailability(Request $request, Hotel $hotel)
 
 public function packageDetails($id)
 {
-    $package = Package::findOrFail($id);
+    $package = Package::where('status', 1)->findOrFail($id);
 
     $relatedPackages = Package::where('id','!=',$package->id)
         ->where('status',1)

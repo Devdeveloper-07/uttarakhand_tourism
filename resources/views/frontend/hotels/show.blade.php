@@ -9,6 +9,14 @@
 
 @section('content')
 
+@php
+    $pendingHotelBooking = session('booking.pending.type') === 'hotel'
+        && (int) session('booking.pending.id') === (int) $hotel->id
+        ? session('booking.pending.form', [])
+        : [];
+    $bookingUser = auth()->user();
+@endphp
+
 {{-- ===================== HERO / SINGLE IMAGE ===================== --}}
 <section class="mmt-hero" id="mmtHero">
     <div class="mmt-hero-top">
@@ -53,8 +61,7 @@
         <div class="mmt-sticky-inner" id="mmtStickyInner">
             <div class="mmt-sticky-info" id="mmtStickyInfo">
                 <div class="mmt-sticky-price" id="mmtStickyPrice">
-                    <span class="mmt-sticky-old" id="mmtStickyOld"><s>₹{{ number_format(($hotel->starting_price ?? $hotel->price ?? 0) * 1.4) }}</s></span>
-                    <span class="mmt-sticky-curr" id="mmtStickyCurr">₹{{ number_format($hotel->starting_price ?? $hotel->price ?? 0) }}</span>
+                    <span class="mmt-sticky-curr" id="mmtStickyCurr">₹{{ number_format($hotel->starting_price ?? 0) }}</span>
                     <span class="mmt-sticky-unit" id="mmtStickyUnit">/ night</span>
                 </div>
                 <div class="mmt-sticky-rating" id="mmtStickyRating">
@@ -394,13 +401,9 @@
                     {{-- Price Header --}}
                     <div class="mmt-booking-header" id="mmtBookingHeader">
                         <div class="mmt-price-tag" id="mmtPriceTag">
-                            <div class="mmt-price-discount" id="mmtPriceDiscount">
-                                <span class="mmt-old-price" id="mmtOldPrice"><s>₹{{ number_format(($hotel->starting_price ?? $hotel->price ?? 0) * 1.4) }}</s></span>
-                                <span class="mmt-discount-badge" id="mmtDiscountBadge">29% OFF</span>
-                            </div>
                             <div class="mmt-price-wrap" id="mmtPriceWrap">
                                 <span class="mmt-price-currency" id="mmtPriceCurrency">₹</span>
-                                <span class="mmt-price-value" id="mmtPriceValue">{{ number_format($hotel->starting_price ?? $hotel->price ?? 0) }}</span>
+                                <span class="mmt-price-value" id="mmtPriceValue">{{ number_format($hotel->starting_price ?? 0) }}</span>
                             </div>
                             <span class="mmt-price-unit" id="mmtPriceUnit">per room / night · GST by tariff slab</span>
                         </div>
@@ -423,14 +426,14 @@
                             action="{{ route('hotel.booking.start', $hotel) }}"
                             data-availability-url="{{ route('hotel.availability', $hotel) }}">
                             @csrf
-                            <input type="hidden" name="checkout_token" value="{{ session('new_checkout_token', old('checkout_token', (string) \Illuminate\Support\Str::uuid())) }}">
+                            <input type="hidden" name="checkout_token" value="{{ session('new_checkout_token', old('checkout_token', data_get($pendingHotelBooking, 'checkout_token', (string) \Illuminate\Support\Str::uuid()))) }}">
                             <div class="mmt-form-row" id="mmtFormRow">
                                 <div class="mmt-form-group" id="mmtFormGroupCheckin">
                                     <label for="mmtCheckinDate" id="mmtLabelCheckin">
                                         <i class="fa-regular fa-calendar" id="mmtIconCheckin"></i> Check-in
                                     </label>
                                     <div class="mmt-input-box" id="mmtInputBoxCheckin">
-                                        <input type="date" name="check_in" id="mmtCheckinDate" min="{{ now()->toDateString() }}" value="{{ old('check_in', request('check_in')) }}" required>
+                                        <input type="date" name="check_in" id="mmtCheckinDate" min="{{ now()->toDateString() }}" value="{{ old('check_in', data_get($pendingHotelBooking, 'check_in', request('check_in'))) }}" required>
                                     </div>
                                 </div>
                                 <div class="mmt-form-group" id="mmtFormGroupCheckout">
@@ -438,7 +441,7 @@
                                         <i class="fa-regular fa-calendar-check" id="mmtIconCheckout"></i> Check-out
                                     </label>
                                     <div class="mmt-input-box" id="mmtInputBoxCheckout">
-                                        <input type="date" name="check_out" id="mmtCheckoutDate" min="{{ now()->addDay()->toDateString() }}" value="{{ old('check_out', request('check_out')) }}" required>
+                                        <input type="date" name="check_out" id="mmtCheckoutDate" min="{{ now()->addDay()->toDateString() }}" value="{{ old('check_out', data_get($pendingHotelBooking, 'check_out', request('check_out'))) }}" required>
                                     </div>
                                 </div>
                             </div>
@@ -451,7 +454,7 @@
                                     <select id="mmtGuestSelect" name="guests" required>
                                         <option value="" disabled {{ old('guests') ? '' : 'selected' }}>Select guests</option>
                                         @foreach (range(1, 20) as $guestCount)
-                                            <option value="{{ $guestCount }}" {{ old('guests') == $guestCount ? 'selected' : '' }}>{{ $guestCount }} {{ $guestCount === 1 ? 'Guest' : 'Guests' }}</option>
+                                        <option value="{{ $guestCount }}" {{ old('guests', data_get($pendingHotelBooking, 'guests')) == $guestCount ? 'selected' : '' }}>{{ $guestCount }} {{ $guestCount === 1 ? 'Guest' : 'Guests' }}</option>
                                         @endforeach
                                     </select>
                                     <i class="fa-solid fa-chevron-down mmt-select-arrow" id="mmtGuestSelectArrow"></i>
@@ -487,7 +490,7 @@
                                                 <input class="form-control" style="width: 84px" type="number"
                                                     name="room_allocations[{{ $room->id }}]" min="0"
                                                     max="20"
-                                                    value="{{ old("room_allocations.{$room->id}", 0) }}"
+                                                    value="{{ old("room_allocations.{$room->id}", data_get($pendingHotelBooking, "room_allocations.{$room->id}", 0)) }}"
                                                     data-room-quantity="{{ $room->id }}" disabled
                                                     aria-label="Quantity of {{ $room->room_name }}">
                                             </label>
@@ -504,7 +507,7 @@
                                     <div class="mmt-input-box" id="mmtInputBoxRooms">
                                         <select id="mmtRoomSelect" name="rooms" required>
                                             @foreach (range(1, 20) as $roomCount)
-                                                <option value="{{ $roomCount }}" {{ old('rooms', 1) == $roomCount ? 'selected' : '' }}>
+                                                <option value="{{ $roomCount }}" {{ old('rooms', data_get($pendingHotelBooking, 'rooms', 1)) == $roomCount ? 'selected' : '' }}>
                                                     {{ $roomCount.' '.($roomCount === 1 ? 'Room' : 'Rooms') }}
                                                 </option>
                                             @endforeach
@@ -517,21 +520,21 @@
                             <div class="mmt-form-group" id="mmtFormGroupName">
                                 <label for="mmtGuestName"><i class="fa-solid fa-user"></i> Full Name</label>
                                 <div class="mmt-input-box">
-                                    <input type="text" name="name" id="mmtGuestName" value="{{ old('name') }}" autocomplete="name" maxlength="120" required>
+                                    <input type="text" name="name" id="mmtGuestName" value="{{ old('name', $bookingUser?->name ?? '') }}" autocomplete="name" maxlength="120" @auth required @endauth>
                                 </div>
                             </div>
 
                             <div class="mmt-form-group" id="mmtFormGroupPhone">
                                 <label for="mmtGuestPhone"><i class="fa-solid fa-phone"></i> Phone Number</label>
                                 <div class="mmt-input-box">
-                                    <input type="tel" name="phone" id="mmtGuestPhone" value="{{ old('phone') }}" autocomplete="tel" maxlength="24" required>
+                                    <input type="tel" name="phone" id="mmtGuestPhone" value="{{ old('phone', $bookingUser?->detail?->mobile ?? '') }}" autocomplete="tel" maxlength="24" @auth required @endauth>
                                 </div>
                             </div>
 
                             <div class="mmt-form-group" id="mmtFormGroupEmail">
                                 <label for="mmtGuestEmail"><i class="fa-solid fa-envelope"></i> Email</label>
                                 <div class="mmt-input-box">
-                                    <input type="email" name="email" id="mmtGuestEmail" value="{{ old('email') }}" autocomplete="email" maxlength="255" required>
+                                    <input type="email" name="email" id="mmtGuestEmail" value="{{ old('email', $bookingUser?->email ?? '') }}" autocomplete="email" maxlength="255" @auth required @endauth>
                                 </div>
                             </div>
 

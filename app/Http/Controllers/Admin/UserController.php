@@ -8,6 +8,8 @@ use App\Models\UserDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules;
 
 class UserController extends Controller
 {
@@ -17,6 +19,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::where('role', 'user')
+            ->with('detail')
             ->latest()
             ->paginate(10);
 
@@ -28,7 +31,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.users.create');
     }
 
     /**
@@ -36,7 +39,42 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'mobile' => ['nullable', 'digits:10', 'unique:user_details,mobile'],
+            'gender' => ['nullable', 'in:Male,Female,Other'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'status' => ['required', 'boolean'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $imageName = null;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = now()->format('YmdHis').'_'.Str::random(10).'.'.$image->extension();
+            File::ensureDirectoryExists(public_path('uploads/users'));
+            $image->move(public_path('uploads/users'), $imageName);
+        }
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'user',
+        ]);
+
+        UserDetail::create([
+            'user_id' => $user->id,
+            'mobile' => $validated['mobile'] ?? null,
+            'gender' => $validated['gender'] ?? null,
+            'image' => $imageName,
+            'status' => (bool) $validated['status'],
+        ]);
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'User Added Successfully.');
     }
 
     /**
@@ -44,6 +82,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        abort_unless($user->role === 'user', 404);
+
         return view('admin.users.show', compact('user'));
     }
 
@@ -52,6 +92,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
+        abort_unless($user->role === 'user', 404);
+
         return view('admin.users.edit', compact('user'));
     }
 
@@ -60,6 +102,8 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        abort_unless($user->role === 'user', 404);
+
         $request->validate([
 
             'name'     => 'required|max:255',
@@ -138,6 +182,8 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        abort_unless($user->role === 'user', 404);
+
         if ($user->detail) {
 
             if (

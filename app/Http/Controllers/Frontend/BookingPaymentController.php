@@ -30,18 +30,38 @@ class BookingPaymentController extends Controller
     {
         abort_unless($hotel->status, 404);
 
-        $validated = $request->validate([
+        $rules = [
             'check_in' => ['required', 'date', 'after_or_equal:today'],
             'check_out' => ['required', 'date', 'after:check_in'],
             'guests' => ['required', 'integer', 'min:1', 'max:20'],
             'rooms' => ['nullable', 'integer', 'min:1', 'max:20'],
             'room_allocations' => ['nullable', 'array'],
             'room_allocations.*' => ['integer', 'min:0', 'max:20'],
-            'name' => ['required', 'string', 'min:2', 'max:120'],
-            'phone' => ['required', 'string', 'max:24', 'regex:/^(?=.*[0-9])[0-9+\-\s()]+$/'],
-            'email' => ['required', 'email', 'max:255'],
             'checkout_token' => ['nullable', 'uuid'],
-        ]);
+        ];
+        if ($request->user()) {
+            $rules += [
+                'name' => ['required', 'string', 'min:2', 'max:120'],
+                'phone' => ['required', 'string', 'max:24', 'regex:/^(?=.*[0-9])[0-9+\-\s()]+$/'],
+                'email' => ['required', 'email', 'max:255'],
+            ];
+        }
+        $validated = $request->validate($rules);
+
+        if (! $request->user()) {
+            $request->session()->put('booking.pending', [
+                'type' => 'hotel',
+                'id' => $hotel->id,
+                'form' => collect($validated)->only([
+                    'check_in', 'check_out', 'guests', 'rooms', 'room_allocations', 'checkout_token',
+                ])->all(),
+            ]);
+            $request->session()->put('url.intended', route('hotel.details', $hotel->id));
+
+            return redirect()->route('login')->with('status', 'Please login to continue your booking.');
+        }
+
+        $this->forgetPendingBooking($request, 'hotel', $hotel->id);
 
         if ($redirect = $this->gatewayConfigurationError()) {
             return $redirect;
@@ -165,14 +185,34 @@ class BookingPaymentController extends Controller
     {
         abort_unless($package->status, 404);
 
-        $validated = $request->validate([
+        $rules = [
             'travel_date' => ['required', 'date', 'after_or_equal:today'],
             'travelers' => ['required', 'integer', 'min:1', 'max:20'],
-            'name' => ['required', 'string', 'min:2', 'max:120'],
-            'phone' => ['required', 'string', 'max:24', 'regex:/^(?=.*[0-9])[0-9+\-\s()]+$/'],
-            'email' => ['required', 'email', 'max:255'],
             'checkout_token' => ['nullable', 'uuid'],
-        ]);
+        ];
+        if ($request->user()) {
+            $rules += [
+                'name' => ['required', 'string', 'min:2', 'max:120'],
+                'phone' => ['required', 'string', 'max:24', 'regex:/^(?=.*[0-9])[0-9+\-\s()]+$/'],
+                'email' => ['required', 'email', 'max:255'],
+            ];
+        }
+        $validated = $request->validate($rules);
+
+        if (! $request->user()) {
+            $request->session()->put('booking.pending', [
+                'type' => 'package',
+                'id' => $package->id,
+                'form' => collect($validated)->only([
+                    'travel_date', 'travelers', 'checkout_token',
+                ])->all(),
+            ]);
+            $request->session()->put('url.intended', route('package.details', $package->id));
+
+            return redirect()->route('login')->with('status', 'Please login to continue your booking.');
+        }
+
+        $this->forgetPendingBooking($request, 'package', $package->id);
 
         if ($package->max_person && $validated['travelers'] > $package->max_person) {
             return back()
@@ -811,7 +851,20 @@ class BookingPaymentController extends Controller
             ->with('payment')
             ->first();
 
+        if ($booking) {
+            abort_unless((int) $booking->user_id === (int) auth()->id(), 404);
+        }
+
         return $booking ? $this->resumeCheckout($booking, $itemType, $itemId) : null;
+    }
+
+    private function forgetPendingBooking(Request $request, string $type, int $itemId): void
+    {
+        $pending = $request->session()->get('booking.pending');
+        if (($pending['type'] ?? null) === $type && (int) ($pending['id'] ?? 0) === $itemId) {
+            $request->session()->forget('booking.pending');
+            $request->session()->forget('url.intended');
+        }
     }
 
     private function resumeCheckout(Booking $booking, string $itemType, int $itemId)

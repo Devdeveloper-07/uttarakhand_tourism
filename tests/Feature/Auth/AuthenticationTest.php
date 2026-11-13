@@ -27,7 +27,24 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('user.dashboard', absolute: false));
+    }
+
+    public function test_admins_are_redirected_to_the_admin_dashboard(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->withSession([
+            'booking.pending' => [
+                'type' => 'hotel',
+                'id' => 99,
+                'form' => ['guests' => 2],
+            ],
+        ])->post('/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ])->assertRedirect(route('admin.dashboard', absolute: false))
+            ->assertSessionMissing('booking.pending');
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
