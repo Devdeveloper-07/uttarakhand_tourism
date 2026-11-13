@@ -19,12 +19,15 @@ class Room extends Model
         'available_rooms',
         'price_per_night',
         'description',
+        'amenities',
+        'image_path',
         'status'
     ];
 
     protected $casts = [
         'status' => 'boolean',
         'price_per_night' => 'decimal:2',
+        'amenities' => 'array',
     ];
 
     public function hotel()

@@ -9,7 +9,9 @@ use App\Models\BookingRoom;
 use App\Models\Hotel;
 use App\Models\Package;
 use App\Models\Payment;
+use App\Models\Room;
 use App\Services\GstCalculator;
+use App\Services\RoomAvailability;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -20,6 +22,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class BookingPaymentController extends Controller
 {
@@ -31,9 +34,9 @@ class BookingPaymentController extends Controller
             'check_in' => ['required', 'date', 'after_or_equal:today'],
             'check_out' => ['required', 'date', 'after:check_in'],
             'guests' => ['required', 'integer', 'min:1', 'max:20'],
-            'rooms' => ['nullable', 'integer', 'min:1', 'max:4'],
+            'rooms' => ['nullable', 'integer', 'min:1', 'max:20'],
             'room_allocations' => ['nullable', 'array'],
-            'room_allocations.*' => ['integer', 'min:0', 'max:4'],
+            'room_allocations.*' => ['integer', 'min:0', 'max:20'],
             'name' => ['required', 'string', 'min:2', 'max:120'],
             'phone' => ['required', 'string', 'max:24', 'regex:/^(?=.*[0-9])[0-9+\-\s()]+$/'],
             'email' => ['required', 'email', 'max:255'],
@@ -54,14 +57,19 @@ class BookingPaymentController extends Controller
         );
         $availableRooms = $hotel->rooms()
             ->where('status', true)
-            ->where('available_rooms', '>', 0)
             ->with('roomType')
             ->get();
         $bookingRooms = [];
+        $inventoryAllocations = [];
         $gstCalculator = app(GstCalculator::class);
         $lines = [];
 
         if ($availableRooms->isNotEmpty()) {
+            $availability = app(RoomAvailability::class)->forRooms(
+                $availableRooms,
+                $validated['check_in'],
+                $validated['check_out']
+            );
             $allocations = collect($validated['room_allocations'] ?? [])
                 ->map(fn ($quantity) => (int) $quantity)
                 ->filter(fn ($quantity) => $quantity > 0);
@@ -72,20 +80,21 @@ class BookingPaymentController extends Controller
                 ]);
             }
 
-            if ($allocations->sum() > 4) {
+            if ($allocations->sum() > 20) {
                 return back()->withInput()->withErrors([
-                    'room_allocations' => 'You can book up to 4 rooms at a time.',
+                    'room_allocations' => 'You can book up to 20 rooms at a time.',
                 ]);
             }
 
             foreach ($allocations as $roomId => $quantity) {
                 $room = $availableRooms->firstWhere('id', (int) $roomId);
-                if (! $room || $quantity > $room->available_rooms) {
+                if (! $room || $quantity > ($availability[$room->id]['available'] ?? 0)) {
                     return back()->withInput()->withErrors([
-                        'room_allocations' => 'The selected room quantity is no longer available.',
+                        'room_allocations' => 'Sorry, this room is no longer available for your selected dates. Please select another room or date.',
                     ]);
                 }
 
+                $inventoryAllocations[$room->id] = $quantity;
                 $bookingRooms[] = [
                     'room_id' => $room->id,
                     'quantity' => $quantity,
@@ -113,7 +122,7 @@ class BookingPaymentController extends Controller
                 ]);
             }
         } else {
-            $hasInventory = $hotel->rooms()->where('status', true)->exists();
+            $hasInventory = $hotel->rooms()->exists();
             if ($hasInventory) {
                 return back()->withInput()->withErrors([
                     'room_allocations' => 'No rooms are currently available at this hotel.',
@@ -142,6 +151,7 @@ class BookingPaymentController extends Controller
             roomCount: $roomCount,
             contact: $validated,
             checkoutToken: $checkoutToken,
+            inventoryAllocations: $inventoryAllocations,
             bookingRooms: $bookingRooms,
             dates: [
                 'check_in' => $validated['check_in'],
@@ -243,6 +253,15 @@ class BookingPaymentController extends Controller
                 return $this->result($booking, $payment, 'failed', 'A different payment has already been recorded for this booking.');
             }
 
+            if ($booking->booking_status === 'cancelled') {
+                return $this->result(
+                    $booking,
+                    $payment,
+                    'failed',
+                    'Your payment was received for a booking that has since been cancelled. Contact support to arrange a refund.'
+                );
+            }
+
             return $this->result($booking, $payment, 'success', 'Your booking is confirmed and payment was received.');
         }
 
@@ -327,6 +346,10 @@ class BookingPaymentController extends Controller
             }
 
             if (($gatewayData['status'] ?? null) !== 'captured') {
+                if (($gatewayData['status'] ?? null) === 'failed') {
+                    $this->releaseFailedReservation($booking, $payment);
+                }
+
                 return $this->result(
                     $booking,
                     $payment,
@@ -345,13 +368,72 @@ class BookingPaymentController extends Controller
             }
 
             $duplicatePaymentMismatch = false;
-            DB::transaction(function () use ($payment, $booking, $validated, $gatewayData, &$duplicatePaymentMismatch): void {
+            $reservationConflict = false;
+            $bookingWasCancelled = false;
+            DB::transaction(function () use (
+                $payment,
+                $booking,
+                $validated,
+                $gatewayData,
+                &$duplicatePaymentMismatch,
+                &$reservationConflict,
+                &$bookingWasCancelled
+            ): void {
                 $lockedPayment = Payment::query()->lockForUpdate()->findOrFail($payment->id);
                 $lockedBooking = Booking::query()->lockForUpdate()->findOrFail($booking->id);
 
                 if ($lockedPayment->payment_status === 'paid') {
                     $duplicatePaymentMismatch = $lockedPayment->gateway_payment_id !== $validated['razorpay_payment_id'];
                     return;
+                }
+
+                if ($lockedBooking->booking_status === 'cancelled') {
+                    $bookingWasCancelled = true;
+                    $lockedPayment->update([
+                        'gateway_payment_id' => $validated['razorpay_payment_id'],
+                        'gateway_signature' => $validated['razorpay_signature'],
+                        'transaction_id' => $validated['razorpay_payment_id'],
+                        'payment_method' => $gatewayData['method'] ?? 'razorpay',
+                        'payment_status' => 'paid',
+                        'payment_date' => now(),
+                        'meta' => [
+                            'gateway_status' => $gatewayData['status'],
+                            'gateway_order_id' => $gatewayData['order_id'],
+                            'booking_cancelled_before_verification' => true,
+                        ],
+                    ]);
+                    $lockedBooking->update([
+                        'payment_status' => 'paid',
+                        'hold_expires_at' => null,
+                    ]);
+                    return;
+                }
+
+                $bookingRooms = BookingRoom::query()
+                    ->where('booking_id', $lockedBooking->id)
+                    ->get(['room_id', 'quantity']);
+                if (
+                    $bookingRooms->isNotEmpty() &&
+                    $lockedBooking->hold_expires_at?->isPast()
+                ) {
+                    $lockedRooms = Room::query()
+                        ->whereIn('id', $bookingRooms->pluck('room_id'))
+                        ->orderBy('id')
+                        ->lockForUpdate()
+                        ->get();
+                    $availability = app(RoomAvailability::class)->forRooms(
+                        $lockedRooms,
+                        $lockedBooking->check_in,
+                        $lockedBooking->check_out,
+                        $lockedBooking->id
+                    );
+
+                    foreach ($bookingRooms as $allocation) {
+                        if ($allocation->quantity > ($availability[$allocation->room_id]['available'] ?? 0)) {
+                            $reservationConflict = true;
+                            break;
+                        }
+                    }
                 }
 
                 $lockedPayment->update([
@@ -364,21 +446,103 @@ class BookingPaymentController extends Controller
                     'meta' => [
                         'gateway_status' => $gatewayData['status'],
                         'gateway_order_id' => $gatewayData['order_id'],
+                        'inventory_conflict' => $reservationConflict,
                     ],
                 ]);
 
                 $lockedBooking->update([
                     'payment_status' => 'paid',
-                    'booking_status' => 'confirmed',
+                    'booking_status' => $reservationConflict ? 'cancelled' : 'confirmed',
+                    'hold_expires_at' => null,
                 ]);
             });
 
             if ($duplicatePaymentMismatch) {
                 return $this->result($booking->fresh(), $payment->fresh(), 'failed', 'A different payment has already been recorded for this booking.');
             }
+            if ($reservationConflict) {
+                Log::error('Captured hotel payment could not be confirmed because the inventory hold expired.', [
+                    'booking_id' => $booking->id,
+                    'payment_id' => $payment->id,
+                ]);
+
+                return $this->result(
+                    $booking->fresh(),
+                    $payment->fresh(),
+                    'failed',
+                    'Your payment was received, but the room reservation expired and availability changed. Please contact support to arrange a refund or alternative.'
+                );
+            }
+            if ($bookingWasCancelled) {
+                Log::error('Captured payment was received for a booking already cancelled by an administrator.', [
+                    'booking_id' => $booking->id,
+                    'payment_id' => $payment->id,
+                ]);
+
+                return $this->result(
+                    $booking->fresh(),
+                    $payment->fresh(),
+                    'failed',
+                    'Your payment was received after this booking was cancelled. Contact support to arrange a refund.'
+                );
+            }
         }
 
         return $this->result($booking->fresh(), $payment->fresh(), 'success', 'Your booking is confirmed and payment was received.');
+    }
+
+    public function paymentFailed(Request $request, Payment $payment)
+    {
+        $validated = $request->validate([
+            'razorpay_payment_id' => ['required', 'string', 'max:100'],
+            'razorpay_order_id' => ['required', 'string', 'max:100'],
+        ]);
+        abort_unless(
+            $payment->gateway_name === 'razorpay' &&
+            $payment->gateway_order_id &&
+            hash_equals($payment->gateway_order_id, $validated['razorpay_order_id']) &&
+            $payment->booking,
+            404
+        );
+
+        try {
+            $response = $this->razorpayRequest()
+                ->get('/payments/'.$validated['razorpay_payment_id']);
+        } catch (ConnectionException $exception) {
+            Log::warning('Razorpay failed payment could not be checked.', [
+                'payment_id' => $payment->id,
+            ]);
+
+            return response()->json([
+                'message' => 'Payment failure could not be confirmed. Your room hold will expire automatically if payment is not completed.',
+            ], 503);
+        }
+
+        $gatewayData = $response->json();
+        if (
+            ! $response->successful() ||
+            ! is_array($gatewayData) ||
+            ($gatewayData['id'] ?? null) !== $validated['razorpay_payment_id'] ||
+            ($gatewayData['order_id'] ?? null) !== $payment->gateway_order_id ||
+            (int) ($gatewayData['amount'] ?? 0) !== (int) round((float) $payment->amount * 100) ||
+            strtoupper((string) ($gatewayData['currency'] ?? '')) !== $payment->currency ||
+            ($gatewayData['status'] ?? null) !== 'failed'
+        ) {
+            Log::warning('Razorpay payment failure callback did not match a failed gateway payment.', [
+                'payment_id' => $payment->id,
+                'http_status' => $response->status(),
+            ]);
+
+            return response()->json([
+                'message' => 'The payment service has not confirmed a failed payment. The room hold remains active temporarily.',
+            ], 422);
+        }
+
+        $this->releaseFailedReservation($payment->booking, $payment);
+
+        return response()->json([
+            'message' => 'Payment failed and the temporary room reservation was released. Start a new booking to retry.',
+        ]);
     }
 
     public function invoice(Payment $payment)
@@ -416,7 +580,8 @@ class BookingPaymentController extends Controller
         array $contact,
         string $checkoutToken,
         array $dates,
-        array $bookingRooms = []
+        array $bookingRooms = [],
+        array $inventoryAllocations = []
     ) {
         $amountPaise = $pricing['total_paise'];
         if ($amountPaise < 100) {
@@ -443,12 +608,87 @@ class BookingPaymentController extends Controller
                 $pricing,
                 $bookingNumber,
                 $checkoutToken,
-                $bookingRooms
+                $bookingRooms,
+                $inventoryAllocations
             ): array {
+                if ($inventoryAllocations !== []) {
+                    $lockedRooms = \App\Models\Room::query()
+                        ->whereIn('id', array_keys($inventoryAllocations))
+                        ->where('hotel_id', $itemId)
+                        ->where('status', true)
+                        ->orderBy('id')
+                        ->lockForUpdate()
+                        ->with('roomType')
+                        ->get();
+
+                    if ($lockedRooms->count() !== count($inventoryAllocations)) {
+                        throw ValidationException::withMessages([
+                            'room_allocations' => 'Sorry, this room is no longer available for your selected dates. Please select another room or date.',
+                        ]);
+                    }
+
+                    $lockedAvailability = app(RoomAvailability::class)->forRooms(
+                        $lockedRooms,
+                        $dates['check_in'],
+                        $dates['check_out']
+                    );
+                    $lockedCapacity = 0;
+                    $lockedNights = (int) Carbon::parse($dates['check_in'])->diffInDays(
+                        Carbon::parse($dates['check_out'])
+                    );
+                    $gstCalculator = app(GstCalculator::class);
+                    foreach ($inventoryAllocations as $roomId => $quantity) {
+                        $lockedRoom = $lockedRooms->firstWhere('id', (int) $roomId);
+                        if ($quantity > ($lockedAvailability[$roomId]['available'] ?? 0)) {
+                            throw ValidationException::withMessages([
+                                'room_allocations' => 'Sorry, this room is no longer available for your selected dates. Please select another room or date.',
+                            ]);
+                        }
+                        $requestedRoom = collect($bookingRooms)->firstWhere('room_id', (int) $roomId);
+                        if (
+                            ! $requestedRoom ||
+                            (int) round((float) $requestedRoom['price'] * 100) !==
+                                (int) round((float) $lockedRoom->price_per_night * 100)
+                        ) {
+                            throw ValidationException::withMessages([
+                                'room_allocations' => 'A selected room rate changed. Please reload the hotel details and try again.',
+                            ]);
+                        }
+
+                        $currentGstLine = $gstCalculator->hotelLine(
+                            (int) round((float) $lockedRoom->price_per_night * 100),
+                            $quantity,
+                            $lockedNights,
+                            $lockedRoom->room_name,
+                            $lockedRoom->id,
+                            $lockedRoom->roomType?->name
+                        );
+                        $checkoutGstLine = collect($pricing['lines'])->firstWhere('room_id', (int) $roomId);
+                        if (
+                            ! $checkoutGstLine ||
+                            (float) $checkoutGstLine['gst_percentage'] !== (float) $currentGstLine['gst_percentage'] ||
+                            (int) round((float) $checkoutGstLine['base_amount'] * 100) !== $currentGstLine['base_paise'] ||
+                            (int) round((float) $checkoutGstLine['gst_amount'] * 100) !== $currentGstLine['gst_paise']
+                        ) {
+                            throw ValidationException::withMessages([
+                                'room_allocations' => 'Room pricing or GST changed. Please reload the hotel details and try again.',
+                            ]);
+                        }
+                        $lockedCapacity += (int) $quantity * (int) $lockedRoom->capacity;
+                    }
+
+                    if ($guestCount > $lockedCapacity) {
+                        throw ValidationException::withMessages([
+                            'guests' => 'The selected rooms can accommodate up to '.$lockedCapacity.' guests.',
+                        ]);
+                    }
+                }
+
                 $booking = Booking::create([
                     'user_id' => $request->user()?->id,
                     'booking_no' => $bookingNumber,
                     'checkout_token' => $checkoutToken,
+                    'hold_expires_at' => $inventoryAllocations !== [] ? now()->addMinutes(15) : null,
                     'item_type' => $itemType,
                     'item_id' => $itemId,
                     'check_in' => $dates['check_in'],
@@ -584,6 +824,12 @@ class BookingPaymentController extends Controller
         }
 
         if ($payment?->gateway_order_id && $payment->payment_status === 'created') {
+            if ($booking->hold_expires_at && $booking->hold_expires_at->isPast()) {
+                return back()->withInput()->withErrors([
+                    'payment' => 'This room reservation expired. Please start a new booking to check availability again.',
+                ])->with('new_checkout_token', (string) Str::uuid());
+            }
+
             return view('frontend.payment.checkout', [
                 'booking' => $booking,
                 'payment' => $payment,
@@ -600,7 +846,7 @@ class BookingPaymentController extends Controller
 
         return back()->withInput()->withErrors([
             'payment' => 'This checkout could not be resumed. Please start a new booking.',
-        ]);
+        ])->with('new_checkout_token', (string) Str::uuid());
     }
 
     private function markOrderCreationFailed(Booking $booking, Payment $payment): void
@@ -610,6 +856,26 @@ class BookingPaymentController extends Controller
             $booking->update([
                 'payment_status' => 'failed',
                 'booking_status' => 'cancelled',
+                'hold_expires_at' => null,
+            ]);
+        });
+    }
+
+    private function releaseFailedReservation(Booking $booking, Payment $payment): void
+    {
+        DB::transaction(function () use ($booking, $payment): void {
+            $lockedPayment = Payment::query()->lockForUpdate()->findOrFail($payment->id);
+            $lockedBooking = Booking::query()->lockForUpdate()->findOrFail($booking->id);
+
+            if ($lockedPayment->payment_status === 'paid') {
+                return;
+            }
+
+            $lockedPayment->update(['payment_status' => 'failed']);
+            $lockedBooking->update([
+                'payment_status' => 'failed',
+                'booking_status' => 'cancelled',
+                'hold_expires_at' => null,
             ]);
         });
     }

@@ -28,6 +28,8 @@ Route::get('/hotels',[HomeController::class,'hotels'])->name('hotels');
 
 Route::get('/hotel/{id}', [HomeController::class,'hotelDetails'])
     ->name('hotel.details');
+Route::get('/hotel/{hotel}/availability', [HomeController::class, 'hotelAvailability'])
+    ->name('hotel.availability');
 
 Route::get('/packages',[HomeController::class,'packages'])->name('packages');
 
@@ -40,6 +42,8 @@ Route::post('/package/{package}/book', [BookingPaymentController::class, 'startP
     ->name('package.booking.start');
 Route::post('/payments/{payment}/verify', [BookingPaymentController::class, 'verify'])
     ->name('payments.verify');
+Route::post('/payments/{payment}/failed', [BookingPaymentController::class, 'paymentFailed'])
+    ->name('payments.failed');
 Route::get('/payments/{payment}/invoice', [BookingPaymentController::class, 'invoice'])
     ->middleware('signed')
     ->name('payments.invoice');
@@ -79,6 +83,7 @@ Route::middleware(['auth', 'admin'])
 
         Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+        Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
         Route::get('/payments/{payment}/invoice', [BookingPaymentController::class, 'invoice'])->name('payments.invoice');

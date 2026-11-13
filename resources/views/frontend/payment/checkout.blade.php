@@ -40,6 +40,12 @@
                     <span class="badge rounded-pill bg-light text-primary-emphasis mb-2"><i class="fa-solid fa-lock me-1"></i> Secure checkout</span>
                     <h1 class="h3 mb-2">{{ $itemName }}</h1>
                     <p class="mb-0 text-white-50">Booking reference: <strong class="text-white">{{ $booking->booking_no }}</strong></p>
+                    @if ($booking->hold_expires_at)
+                        <p class="small text-white-50 mt-2 mb-0">
+                            <i class="fa-regular fa-clock me-1"></i>
+                            Room availability is held until {{ $booking->hold_expires_at->format('d M Y, h:i A') }}.
+                        </p>
+                    @endif
                 </header>
 
                 <div class="gst-checkout-body">
@@ -139,6 +145,11 @@
                         <input type="hidden" name="razorpay_order_id">
                         <input type="hidden" name="razorpay_signature">
                     </form>
+                    <form id="failed-payment-form" method="POST" action="{{ route('payments.failed', $payment) }}" hidden>
+                        @csrf
+                        <input type="hidden" name="razorpay_payment_id">
+                        <input type="hidden" name="razorpay_order_id" value="{{ $payment->gateway_order_id }}">
+                    </form>
                 </div>
             </div>
         </div>
@@ -177,8 +188,35 @@
         const razorpayCheckout = new Razorpay(paymentOptions);
         razorpayCheckout.on('payment.failed', function (response) {
             const description = response.error && response.error.description;
-            document.getElementById('payment-message').textContent =
-                description || 'Payment was not completed. You can try again using the same secure order.';
+            const message = document.getElementById('payment-message');
+            const failureForm = document.getElementById('failed-payment-form');
+            const paymentId = response.error && response.error.metadata && response.error.metadata.payment_id;
+            const orderId = response.error && response.error.metadata && response.error.metadata.order_id;
+            if (!paymentId || !orderId) {
+                message.textContent = description ||
+                    'Payment was not completed. We could not confirm the failure yet, so the room hold remains temporary.';
+                return;
+            }
+
+            failureForm.elements.razorpay_payment_id.value = paymentId;
+            failureForm.elements.razorpay_order_id.value = orderId;
+            message.textContent = 'Confirming payment status and releasing the temporary room hold…';
+            fetch(failureForm.action, {
+                method: 'POST',
+                body: new FormData(failureForm),
+                headers: { Accept: 'application/json' }
+            })
+                .then(async (response) => {
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.message || 'Payment status could not be confirmed.');
+                    message.textContent = result.message;
+                    document.getElementById('pay-now').disabled = true;
+                })
+                .catch((error) => {
+                    message.textContent = error.message ||
+                        description ||
+                        'Payment was not completed. Your room hold will expire automatically.';
+                });
         });
 
         document.getElementById('pay-now').addEventListener('click', function () {

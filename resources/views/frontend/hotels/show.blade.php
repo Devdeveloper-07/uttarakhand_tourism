@@ -4,6 +4,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="{{ asset('frontend/css/hotel-premium.css') }}?v={{ filemtime(public_path('frontend/css/hotel-premium.css')) }}">
 @endpush
 
 @section('content')
@@ -44,18 +45,6 @@
         </div>
     </div>
 
-    {{-- Single Image --}}
-    <div class="mmt-gallery-wrap" id="mmtGalleryWrap">
-        <div class="container" id="mmtGalleryContainer">
-            <div class="mmt-single-image" id="mmtSingleImage">
-                @if($hotel->thumbnail)
-                    <img src="{{ asset('uploads/hotels/'.$hotel->thumbnail) }}" alt="{{ $hotel->hotel_name }}" id="mmtMainImage" loading="eager">
-                @else
-                    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&h=700&fit=crop" alt="{{ $hotel->hotel_name }}" id="mmtMainImage">
-                @endif
-            </div>
-        </div>
-    </div>
 </section>
 
 {{-- ===================== STICKY BOOKING BAR ===================== --}}
@@ -430,7 +419,9 @@
                                 @endforeach
                             </div>
                         @endif
-                        <form id="mmtBookingForm" class="mmt-booking-form" method="POST" action="{{ route('hotel.booking.start', $hotel) }}">
+                        <form id="mmtBookingForm" class="mmt-booking-form" method="POST"
+                            action="{{ route('hotel.booking.start', $hotel) }}"
+                            data-availability-url="{{ route('hotel.availability', $hotel) }}">
                             @csrf
                             <input type="hidden" name="checkout_token" value="{{ session('new_checkout_token', old('checkout_token', (string) \Illuminate\Support\Str::uuid())) }}">
                             <div class="mmt-form-row" id="mmtFormRow">
@@ -439,7 +430,7 @@
                                         <i class="fa-regular fa-calendar" id="mmtIconCheckin"></i> Check-in
                                     </label>
                                     <div class="mmt-input-box" id="mmtInputBoxCheckin">
-                                        <input type="date" name="check_in" id="mmtCheckinDate" min="{{ now()->toDateString() }}" value="{{ old('check_in') }}" required>
+                                        <input type="date" name="check_in" id="mmtCheckinDate" min="{{ now()->toDateString() }}" value="{{ old('check_in', request('check_in')) }}" required>
                                     </div>
                                 </div>
                                 <div class="mmt-form-group" id="mmtFormGroupCheckout">
@@ -447,7 +438,7 @@
                                         <i class="fa-regular fa-calendar-check" id="mmtIconCheckout"></i> Check-out
                                     </label>
                                     <div class="mmt-input-box" id="mmtInputBoxCheckout">
-                                        <input type="date" name="check_out" id="mmtCheckoutDate" min="{{ now()->addDay()->toDateString() }}" value="{{ old('check_out') }}" required>
+                                        <input type="date" name="check_out" id="mmtCheckoutDate" min="{{ now()->addDay()->toDateString() }}" value="{{ old('check_out', request('check_out')) }}" required>
                                     </div>
                                 </div>
                             </div>
@@ -469,22 +460,35 @@
 
                             @if ($hotel->rooms->isNotEmpty())
                                 <div class="mmt-form-group">
-                                    <label><i class="fa-solid fa-bed"></i> Select rooms (up to 4)</label>
+                                    <label><i class="fa-solid fa-bed"></i> Select rooms (up to 20)</label>
                                     <div class="d-grid gap-2">
                                         @foreach ($hotel->rooms as $room)
-                                            <label class="d-flex align-items-center justify-content-between gap-3 border rounded-3 bg-white p-3">
+                                            <label class="d-flex align-items-center justify-content-between gap-3 border rounded-3 bg-white p-3"
+                                                data-room-option="{{ $room->id }}">
                                                 <span>
+                                                    @if ($room->image_path)
+                                                        <img src="{{ asset('storage/'.$room->image_path) }}" alt="{{ $room->room_name }}"
+                                                            class="d-block rounded mb-2" style="width:92px;height:64px;object-fit:cover">
+                                                    @endif
                                                     <strong class="d-block">{{ $room->room_name }}</strong>
                                                     <small class="text-muted">
                                                         {{ $room->roomType?->name ?? 'Room' }} · Sleeps {{ $room->capacity }} ·
                                                         ₹{{ number_format((float) $room->price_per_night, 2) }} / night ·
-                                                        {{ $room->available_rooms }} available
+                                                        {{ (int) $room->total_rooms }} total
                                                     </small>
+                                                    @if ($room->amenities)
+                                                        <small class="d-block text-muted">{{ implode(' · ', $room->amenities) }}</small>
+                                                    @endif
+                                                    <small class="d-block fw-semibold text-primary" data-room-availability>
+                                                        Select dates to see availability
+                                                    </small>
+                                                    <small class="d-block text-muted" data-room-daily></small>
                                                 </span>
                                                 <input class="form-control" style="width: 84px" type="number"
                                                     name="room_allocations[{{ $room->id }}]" min="0"
-                                                    max="{{ min(4, $room->available_rooms) }}"
+                                                    max="20"
                                                     value="{{ old("room_allocations.{$room->id}", 0) }}"
+                                                    data-room-quantity="{{ $room->id }}" disabled
                                                     aria-label="Quantity of {{ $room->room_name }}">
                                             </label>
                                         @endforeach
@@ -499,7 +503,7 @@
                                     </label>
                                     <div class="mmt-input-box" id="mmtInputBoxRooms">
                                         <select id="mmtRoomSelect" name="rooms" required>
-                                            @foreach (range(1, 4) as $roomCount)
+                                            @foreach (range(1, 20) as $roomCount)
                                                 <option value="{{ $roomCount }}" {{ old('rooms', 1) == $roomCount ? 'selected' : '' }}>
                                                     {{ $roomCount.' '.($roomCount === 1 ? 'Room' : 'Rooms') }}
                                                 </option>
@@ -648,7 +652,8 @@
         @if($relatedHotels && $relatedHotels->count() > 0)
             <div class="row g-4" id="mmtRelatedRow">
                 @foreach($relatedHotels as $item)
-                    <div class="col-lg-3 col-md-6" id="mmtRelatedCol{{ $item->id }}">
+                    <div class="{{ $relatedHotels->count() <= 2 ? 'col-lg-6' : 'col-lg-3' }} col-md-6"
+                        id="mmtRelatedCol{{ $item->id }}">
                         <div class="mmt-related-card" id="mmtRelatedCard{{ $item->id }}">
                             <div class="mmt-related-img-wrap" id="mmtRelatedImgWrap{{ $item->id }}">
                                 @if($item->thumbnail)
@@ -696,19 +701,7 @@
 </section>
 
 {{-- ===================== LIGHTBOX ===================== --}}
-<div class="mmt-lightbox" id="lightbox">
-    <div class="mmt-lightbox-backdrop" onclick="closeLightbox()" id="mmtLightboxBackdrop"></div>
-    <div class="mmt-lightbox-content" id="mmtLightboxContent">
-        <button class="mmt-lightbox-close" onclick="closeLightbox()" id="mmtLightboxCloseBtn">
-            <i class="fa-solid fa-xmark" id="mmtLightboxCloseIcon"></i>
-        </button>
-        @if($hotel->thumbnail)
-            <img src="{{ asset('uploads/hotels/'.$hotel->thumbnail) }}" alt="{{ $hotel->hotel_name }}" id="mmtLightboxImg">
-        @else
-            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1600&h=800&fit=crop" alt="{{ $hotel->hotel_name }}" id="mmtLightboxImg">
-        @endif
-    </div>
-</div>
+
 
 {{-- Leaflet JS --}}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -866,5 +859,106 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 </script>
+
+@if ($hotel->rooms->isNotEmpty())
+<script>
+(() => {
+    const form = document.getElementById('mmtBookingForm');
+    const checkIn = document.getElementById('mmtCheckinDate');
+    const checkOut = document.getElementById('mmtCheckoutDate');
+    if (!form || !checkIn || !checkOut) return;
+
+    let activeRequest;
+    let availabilityState = 'idle';
+    const quantityInputs = [...form.querySelectorAll('[data-room-quantity]')];
+
+    function updateCheckoutMinimum() {
+        if (!checkIn.value) return;
+        const [year, month, day] = checkIn.value.split('-').map(Number);
+        const minimum = new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
+        checkOut.min = minimum;
+        if (checkOut.value && checkOut.value < minimum) checkOut.value = '';
+    }
+
+    async function refreshAvailability() {
+        quantityInputs.forEach((input) => { input.disabled = true; });
+        if (!checkIn.value || !checkOut.value || checkOut.value <= checkIn.value) {
+            availabilityState = 'idle';
+            document.querySelectorAll('[data-room-availability]').forEach((node) => {
+                node.textContent = 'Select valid dates to see availability';
+            });
+            document.querySelectorAll('[data-room-daily]').forEach((node) => { node.textContent = ''; });
+            return;
+        }
+
+        if (activeRequest) activeRequest.abort();
+        activeRequest = new AbortController();
+        availabilityState = 'loading';
+        quantityInputs.forEach((input) => { input.value = 0; });
+
+        const url = new URL(form.dataset.availabilityUrl, window.location.origin);
+        url.searchParams.set('check_in', checkIn.value);
+        url.searchParams.set('check_out', checkOut.value);
+
+        try {
+            const response = await fetch(url, {
+                headers: { Accept: 'application/json' },
+                signal: activeRequest.signal,
+            });
+            if (!response.ok) throw new Error('Availability lookup failed.');
+            const result = await response.json();
+
+            result.rooms.forEach((room) => {
+                const input = form.querySelector(`[data-room-quantity="${room.id}"]`);
+                const status = form.querySelector(`[data-room-option="${room.id}"] [data-room-availability]`);
+                const daily = form.querySelector(`[data-room-option="${room.id}"] [data-room-daily]`);
+                if (!input || !status || !daily) return;
+
+                const available = Number(room.available);
+                input.max = Math.min(20, available);
+                input.disabled = available < 1;
+                status.textContent = available < 1
+                    ? 'Sold out for these dates'
+                    : available <= 2
+                        ? `Only ${available} room${available === 1 ? '' : 's'} left`
+                        : `${available} rooms available`;
+                daily.textContent = room.daily.map((night) =>
+                    `${night.date}: ${night.available} available`
+                ).join(' · ');
+            });
+            availabilityState = 'ready';
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            availabilityState = 'error';
+            quantityInputs.forEach((input) => { input.disabled = true; });
+            document.querySelectorAll('[data-room-availability]').forEach((node) => {
+                node.textContent = 'Availability could not be checked. Please try again.';
+            });
+        }
+    }
+
+    checkIn.addEventListener('change', () => {
+        updateCheckoutMinimum();
+        refreshAvailability();
+    });
+    checkOut.addEventListener('change', refreshAvailability);
+    form.addEventListener('submit', (event) => {
+        if (availabilityState !== 'ready') {
+            event.preventDefault();
+            if (availabilityState !== 'loading') refreshAvailability();
+            return;
+        }
+        const selected = quantityInputs.filter((input) => Number(input.value) > 0);
+        if (selected.length === 0) {
+            event.preventDefault();
+            alert('Select at least one available room for your dates.');
+        }
+    });
+
+    updateCheckoutMinimum();
+    if (checkIn.value && checkOut.value) refreshAvailability();
+})();
+</script>
+@endif
 
 @endsection

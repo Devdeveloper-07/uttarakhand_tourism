@@ -27,6 +27,16 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
     <!-- Stats Bar -->
     <div class="row g-3 mb-4">
@@ -36,8 +46,8 @@
                     <i class="fa-solid fa-bed text-primary"></i>
                 </div>
                 <div class="mini-stat-info">
-                    <h4>{{ $rooms->total() }}</h4>
-                    <span>Total Rooms</span>
+                    <h4>{{ $inventory['total'] }}</h4>
+                    <span>Total Inventory</span>
                 </div>
             </div>
         </div>
@@ -47,8 +57,8 @@
                     <i class="fa-solid fa-check-circle text-success"></i>
                 </div>
                 <div class="mini-stat-info">
-                    <h4>{{ $rooms->where('status', 1)->count() }}</h4>
-                    <span>Available</span>
+                    <h4>{{ $inventory['available'] }}</h4>
+                    <span>Available for Dates</span>
                 </div>
             </div>
         </div>
@@ -58,8 +68,8 @@
                     <i class="fa-solid fa-circle-xmark text-danger"></i>
                 </div>
                 <div class="mini-stat-info">
-                    <h4>{{ $rooms->where('status', 0)->count() }}</h4>
-                    <span>Unavailable</span>
+                    <h4>{{ $inventory['occupied'] }}</h4>
+                    <span>Booked</span>
                 </div>
             </div>
         </div>
@@ -69,10 +79,44 @@
                     <i class="fa-solid fa-hotel text-info"></i>
                 </div>
                 <div class="mini-stat-info">
-                    <h4>{{ $rooms->groupBy('hotel_id')->count() }}</h4>
-                    <span>Hotels</span>
+                    <h4>{{ $inventory['reserved'] }}</h4>
+                    <span>Temporary Holds</span>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="content-card mb-4">
+        <div class="card-body-custom">
+            <form method="GET" action="{{ route('admin.rooms.index') }}" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Hotel</label>
+                    <select name="hotel_id" class="form-select">
+                        <option value="">All hotels</option>
+                        @foreach ($hotels as $hotel)
+                            <option value="{{ $hotel->id }}" @selected((string) $hotelFilter === (string) $hotel->id)>
+                                {{ $hotel->hotel_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Check-in</label>
+                    <input type="date" name="check_in" class="form-control" value="{{ $inventory['check_in'] }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Check-out</label>
+                    <input type="date" name="check_out" class="form-control" value="{{ $inventory['check_out'] }}" required>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" type="submit"><i class="fa-solid fa-filter me-1"></i> Apply</button>
+                </div>
+            </form>
+            <p class="text-muted small mt-3 mb-0">
+                Hotels: {{ $inventory['hotels'] }} · Room types: {{ $inventory['room_types'] }} ·
+                Occupancy: {{ $inventory['occupancy'] }}% · Availability is the minimum inventory across
+                {{ $inventory['check_in'] }} to (but not including) {{ $inventory['check_out'] }}.
+            </p>
         </div>
     </div>
 
@@ -102,6 +146,9 @@
                         <th>Hotel</th>
                         <th>Room Details</th>
                         <th>Room Type</th>
+                        <th>Total</th>
+                        <th>Occupied</th>
+                        <th>Available</th>
                         <th width="90">Capacity</th>
                         <th width="120">Price/Night</th>
                         <th width="100">Status</th>
@@ -131,6 +178,24 @@
                             <span class="room-type-badge">{{ $room->roomType->name }}</span>
                         </td>
 
+                        @php($roomCounts = $inventory['availability'][$room->id] ?? ['total' => $room->total_rooms, 'booked' => 0, 'reserved' => 0, 'available' => $room->total_rooms, 'daily' => []])
+                        <td>{{ $roomCounts['total'] }}</td>
+                        <td>
+                            {{ $roomCounts['booked'] }}
+                            @if ($roomCounts['reserved'] > 0)
+                                <small class="d-block text-warning">{{ $roomCounts['reserved'] }} reserved</small>
+                            @endif
+                        </td>
+                        <td>
+                            <strong>{{ $roomCounts['available'] }}</strong>
+                            <details class="small">
+                                <summary>By night</summary>
+                                @foreach ($roomCounts['daily'] as $night)
+                                    <div>{{ \Illuminate\Support\Carbon::parse($night['date'])->format('d M') }}: {{ $night['available'] }}</div>
+                                @endforeach
+                            </details>
+                        </td>
+
                         <td>
                             <div class="capacity-info">
                                 <i class="fa-solid fa-user-group text-primary"></i>
@@ -148,11 +213,11 @@
                         <td>
                             @if($room->status)
                                 <span class="status-badge active">
-                                    <span class="status-dot"></span> Available
+                                    <span class="status-dot"></span> Active
                                 </span>
                             @else
                                 <span class="status-badge inactive">
-                                    <span class="status-dot"></span> Unavailable
+                                    <span class="status-dot"></span> Inactive
                                 </span>
                             @endif
                         </td>
@@ -191,7 +256,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8">
+                        <td colspan="11">
                             <div class="empty-state">
                                 <div class="empty-icon">
                                     <i class="fa-solid fa-bed"></i>

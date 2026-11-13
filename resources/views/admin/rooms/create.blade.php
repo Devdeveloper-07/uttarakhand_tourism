@@ -43,7 +43,7 @@
         </div>
 
         <div class="card-body-custom">
-            <form action="{{ route('admin.rooms.store') }}" method="POST" class="modern-form">
+            <form action="{{ route('admin.rooms.store') }}" method="POST" enctype="multipart/form-data" class="modern-form">
                 @csrf
 
                 <div class="row g-4">
@@ -127,17 +127,6 @@
                         </div>
                     </div>
 
-                    <!-- Available Rooms -->
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fa-solid fa-door-open text-primary"></i> Available Rooms <span class="text-danger">*</span>
-                            </label>
-                            <input type="number" name="available_rooms" class="form-control modern-input" value="{{ old('available_rooms') }}" placeholder="Available count" min="0" required>
-                            <small class="form-hint">Currently available for booking</small>
-                        </div>
-                    </div>
-
                     <!-- Price Per Night -->
                     <div class="col-md-6">
                         <div class="form-group">
@@ -186,6 +175,23 @@
                             </label>
                             <textarea name="description" rows="4" class="form-control modern-input" placeholder="Describe the room features, amenities, and facilities...">{{ old('description') }}</textarea>
                             <small class="form-hint">Optional - Add room details and amenities</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fa-solid fa-list-check text-primary"></i> Amenities</label>
+                            <input type="text" name="amenities_text" class="form-control modern-input"
+                                value="{{ old('amenities_text') }}" placeholder="Wi-Fi, Air conditioning, Breakfast">
+                            <small class="form-hint">Separate amenities with commas</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fa-solid fa-image text-primary"></i> Room Image</label>
+                            <input type="file" name="image" class="form-control modern-input" accept="image/*">
+                            <small class="form-hint">Optional image, up to 5 MB</small>
                         </div>
                     </div>
                 </div>

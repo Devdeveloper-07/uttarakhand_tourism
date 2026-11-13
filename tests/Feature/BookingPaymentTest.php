@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Booking;
+use App\Models\BookingRoom;
 use App\Models\Hotel;
 use App\Models\HotelGstSlab;
 use App\Models\Package;
@@ -650,6 +651,470 @@ class BookingPaymentTest extends TestCase
         $this->assertDatabaseCount('bookings', 1);
         $this->assertDatabaseCount('payments', 1);
         Http::assertSentCount(1);
+    }
+
+    public function test_datewise_availability_reuses_rooms_on_checkout_and_nonoverlapping_dates(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Date availability hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 1000,
+            'status' => true,
+        ]);
+        $roomType = RoomType::create(['name' => 'Deluxe', 'status' => true]);
+        $room = Room::create([
+            'hotel_id' => $hotel->id,
+            'room_name' => 'Deluxe room',
+            'room_number' => 'DATE-ROOM-1',
+            'room_type_id' => $roomType->id,
+            'capacity' => 2,
+            'total_rooms' => 5,
+            'available_rooms' => 0,
+            'price_per_night' => 3000,
+            'status' => true,
+        ]);
+        $checkIn = now()->addDays(3)->startOfDay();
+        $checkOut = $checkIn->copy()->addDays(3);
+        $booking = Booking::create([
+            'booking_no' => 'BK-DATE-AVAILABILITY',
+            'item_type' => 'hotel',
+            'item_id' => $hotel->id,
+            'check_in' => $checkIn,
+            'check_out' => $checkOut,
+            'guest' => 2,
+            'room_count' => 1,
+            'total_amount' => 3000,
+            'grand_total' => 3150,
+            'currency' => 'INR',
+            'payment_status' => 'paid',
+            'booking_status' => 'confirmed',
+        ]);
+        BookingRoom::create([
+            'booking_id' => $booking->id,
+            'room_id' => $room->id,
+            'quantity' => 1,
+            'price' => 3000,
+        ]);
+
+        $availabilityUrl = route('hotel.availability', $hotel);
+        $this->get($availabilityUrl.'?'.http_build_query([
+            'check_in' => $checkIn->toDateString(),
+            'check_out' => $checkOut->toDateString(),
+        ]))
+            ->assertOk()
+            ->assertJsonPath('rooms.0.total', 5)
+            ->assertJsonPath('rooms.0.available', 4)
+            ->assertJsonPath('rooms.0.daily.0.available', 4)
+            ->assertJsonPath('rooms.0.daily.1.available', 4)
+            ->assertJsonPath('rooms.0.daily.2.available', 4);
+
+        $this->get($availabilityUrl.'?'.http_build_query([
+            'check_in' => $checkOut->toDateString(),
+            'check_out' => $checkOut->copy()->addDays(2)->toDateString(),
+        ]))
+            ->assertOk()
+            ->assertJsonPath('rooms.0.total', 5)
+            ->assertJsonPath('rooms.0.available', 5);
+
+        $this->get($availabilityUrl.'?'.http_build_query([
+            'check_in' => $checkIn->copy()->addDays(2)->toDateString(),
+            'check_out' => $checkOut->copy()->addDays(2)->toDateString(),
+        ]))
+            ->assertOk()
+            ->assertJsonPath('rooms.0.daily.0.available', 4)
+            ->assertJsonPath('rooms.0.daily.1.available', 5)
+            ->assertJsonPath('rooms.0.daily.2.available', 5)
+            ->assertJsonPath('rooms.0.available', 4);
+
+        $this->get(route('hotels', [
+            'check_in' => $checkIn->toDateString(),
+            'check_out' => $checkOut->toDateString(),
+        ]))
+            ->assertOk()
+            ->assertSee('4 of 5 rooms available for selected dates');
+    }
+
+    public function test_active_checkout_holds_reduce_availability_until_expired(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Temporary hold hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 1000,
+            'status' => true,
+        ]);
+        $roomType = RoomType::create(['name' => 'Standard', 'status' => true]);
+        $room = Room::create([
+            'hotel_id' => $hotel->id,
+            'room_name' => 'Standard room',
+            'room_number' => 'HOLD-ROOM-1',
+            'room_type_id' => $roomType->id,
+            'capacity' => 2,
+            'total_rooms' => 5,
+            'available_rooms' => 5,
+            'price_per_night' => 1000,
+            'status' => true,
+        ]);
+        $checkIn = now()->addDays(3);
+        $checkOut = $checkIn->copy()->addDays(2);
+        $booking = Booking::create([
+            'booking_no' => 'BK-TEMP-HOLD',
+            'item_type' => 'hotel',
+            'item_id' => $hotel->id,
+            'check_in' => $checkIn,
+            'check_out' => $checkOut,
+            'guest' => 2,
+            'room_count' => 2,
+            'total_amount' => 2000,
+            'grand_total' => 2000,
+            'currency' => 'INR',
+            'payment_status' => 'pending',
+            'booking_status' => 'pending',
+            'hold_expires_at' => now()->addMinutes(15),
+        ]);
+        BookingRoom::create([
+            'booking_id' => $booking->id,
+            'room_id' => $room->id,
+            'quantity' => 2,
+            'price' => 1000,
+        ]);
+        $url = route('hotel.availability', $hotel).'?'.http_build_query([
+            'check_in' => $checkIn->toDateString(),
+            'check_out' => $checkOut->toDateString(),
+        ]);
+
+        $this->get($url)->assertOk()->assertJsonPath('rooms.0.available', 3);
+
+        $booking->update(['hold_expires_at' => now()->subSecond()]);
+
+        $this->get($url)->assertOk()->assertJsonPath('rooms.0.available', 5);
+    }
+
+    public function test_booking_rejects_a_quantity_above_datewise_inventory(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Inventory limit hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 1000,
+            'status' => true,
+        ]);
+        $roomType = RoomType::create(['name' => 'Standard', 'status' => true]);
+        $room = Room::create([
+            'hotel_id' => $hotel->id,
+            'room_name' => 'Standard room',
+            'room_number' => 'LIMIT-ROOM-1',
+            'room_type_id' => $roomType->id,
+            'capacity' => 2,
+            'total_rooms' => 5,
+            'available_rooms' => 5,
+            'price_per_night' => 1000,
+            'status' => true,
+        ]);
+
+        $this->from(route('hotel.details', $hotel))->post(route('hotel.booking.start', $hotel), [
+            'check_in' => now()->addDays(3)->toDateString(),
+            'check_out' => now()->addDays(4)->toDateString(),
+            'guests' => 1,
+            'room_allocations' => [$room->id => 6],
+            'name' => 'Test Guest',
+            'phone' => '+91 9876543210',
+            'email' => 'guest@example.com',
+        ])->assertRedirect(route('hotel.details', $hotel))
+            ->assertSessionHasErrors([
+                'room_allocations' => 'Sorry, this room is no longer available for your selected dates. Please select another room or date.',
+            ]);
+
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_checkout_reservation_prevents_a_second_booking_from_overselling_rooms(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Oversell protection hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 1000,
+            'status' => true,
+        ]);
+        $roomType = RoomType::create(['name' => 'Standard', 'status' => true]);
+        $room = Room::create([
+            'hotel_id' => $hotel->id,
+            'room_name' => 'Standard room',
+            'room_number' => 'OVERSELL-ROOM-1',
+            'room_type_id' => $roomType->id,
+            'capacity' => 2,
+            'total_rooms' => 5,
+            'available_rooms' => 5,
+            'price_per_night' => 1000,
+            'status' => true,
+        ]);
+        Http::fake(function (ClientRequest $request) {
+            return Http::response([
+                'id' => 'order_oversell',
+                'amount' => $request['amount'],
+                'currency' => 'INR',
+            ]);
+        });
+        $payload = [
+            'check_in' => now()->addDays(3)->toDateString(),
+            'check_out' => now()->addDays(5)->toDateString(),
+            'guests' => 1,
+            'room_allocations' => [$room->id => 3],
+            'name' => 'Test Guest',
+            'phone' => '+91 9876543210',
+            'email' => 'guest@example.com',
+        ];
+
+        $this->post(route('hotel.booking.start', $hotel), $payload)->assertOk();
+        $this->from(route('hotel.details', $hotel))
+            ->post(route('hotel.booking.start', $hotel), $payload)
+            ->assertRedirect(route('hotel.details', $hotel))
+            ->assertSessionHasErrors([
+                'room_allocations' => 'Sorry, this room is no longer available for your selected dates. Please select another room or date.',
+            ]);
+
+        $this->assertDatabaseCount('bookings', 1);
+        $this->assertDatabaseHas('bookings', [
+            'booking_status' => 'pending',
+            'room_count' => 3,
+        ]);
+        $this->assertNotNull(Booking::query()->firstOrFail()->hold_expires_at);
+    }
+
+    public function test_failed_payment_releases_temporary_room_reservation(): void
+    {
+        $hotel = Hotel::create([
+            'hotel_name' => 'Failed payment hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 1000,
+            'status' => true,
+        ]);
+        $roomType = RoomType::create(['name' => 'Standard', 'status' => true]);
+        $room = Room::create([
+            'hotel_id' => $hotel->id,
+            'room_name' => 'Standard room',
+            'room_number' => 'FAILED-ROOM-1',
+            'room_type_id' => $roomType->id,
+            'capacity' => 2,
+            'total_rooms' => 1,
+            'available_rooms' => 1,
+            'price_per_night' => 1000,
+            'status' => true,
+        ]);
+        $checkIn = now()->addDays(3);
+        $checkOut = $checkIn->copy()->addDay();
+        $booking = Booking::create([
+            'booking_no' => 'BK-FAILED-RELEASE',
+            'item_type' => 'hotel',
+            'item_id' => $hotel->id,
+            'check_in' => $checkIn,
+            'check_out' => $checkOut,
+            'guest' => 1,
+            'room_count' => 1,
+            'total_amount' => 1000,
+            'grand_total' => 1000,
+            'currency' => 'INR',
+            'payment_status' => 'pending',
+            'booking_status' => 'pending',
+            'hold_expires_at' => now()->addMinutes(15),
+        ]);
+        BookingRoom::create([
+            'booking_id' => $booking->id,
+            'room_id' => $room->id,
+            'quantity' => 1,
+            'price' => 1000,
+        ]);
+        $payment = Payment::create([
+            'booking_id' => $booking->id,
+            'gateway_name' => 'razorpay',
+            'gateway_order_id' => 'order_failed_release',
+            'currency' => 'INR',
+            'amount' => 1000,
+            'payment_status' => 'created',
+        ]);
+        $paymentId = 'pay_failed_release';
+        Http::fake([
+            'api.razorpay.com/v1/payments/'.$paymentId => Http::response([
+                'id' => $paymentId,
+                'order_id' => 'order_failed_release',
+                'amount' => 100000,
+                'currency' => 'INR',
+                'status' => 'failed',
+            ]),
+        ]);
+
+        $this->postJson(route('payments.failed', $payment), [
+            'razorpay_payment_id' => $paymentId,
+            'razorpay_order_id' => 'order_failed_release',
+        ])
+            ->assertOk()
+            ->assertJsonPath('message', 'Payment failed and the temporary room reservation was released. Start a new booking to retry.');
+
+        $this->assertDatabaseHas('bookings', [
+            'id' => $booking->id,
+            'booking_status' => 'cancelled',
+            'hold_expires_at' => null,
+        ]);
+        $this->assertDatabaseHas('payments', [
+            'id' => $payment->id,
+            'payment_status' => 'failed',
+        ]);
+        $this->get(route('hotel.availability', $hotel).'?'.http_build_query([
+            'check_in' => $checkIn->toDateString(),
+            'check_out' => $checkOut->toDateString(),
+        ]))->assertOk()->assertJsonPath('rooms.0.available', 1);
+    }
+
+    public function test_admin_cancellation_releases_the_room_for_its_dates(): void
+    {
+        $admin = User::create([
+            'name' => 'Inventory Admin',
+            'email' => 'inventory-admin@example.com',
+            'password' => 'test-password',
+            'role' => 'admin',
+        ]);
+        $hotel = Hotel::create([
+            'hotel_name' => 'Cancellation hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 1000,
+            'status' => true,
+        ]);
+        $roomType = RoomType::create(['name' => 'Standard', 'status' => true]);
+        $room = Room::create([
+            'hotel_id' => $hotel->id,
+            'room_name' => 'Standard room',
+            'room_number' => 'CANCEL-ROOM-1',
+            'room_type_id' => $roomType->id,
+            'capacity' => 2,
+            'total_rooms' => 1,
+            'available_rooms' => 1,
+            'price_per_night' => 1000,
+            'status' => true,
+        ]);
+        $checkIn = now()->addDays(3);
+        $checkOut = $checkIn->copy()->addDay();
+        $booking = Booking::create([
+            'booking_no' => 'BK-CANCEL-ROOM',
+            'item_type' => 'hotel',
+            'item_id' => $hotel->id,
+            'check_in' => $checkIn,
+            'check_out' => $checkOut,
+            'guest' => 1,
+            'room_count' => 1,
+            'total_amount' => 1000,
+            'grand_total' => 1000,
+            'currency' => 'INR',
+            'payment_status' => 'paid',
+            'booking_status' => 'confirmed',
+        ]);
+        BookingRoom::create([
+            'booking_id' => $booking->id,
+            'room_id' => $room->id,
+            'quantity' => 1,
+            'price' => 1000,
+        ]);
+        $availabilityUrl = route('hotel.availability', $hotel).'?'.http_build_query([
+            'check_in' => $checkIn->toDateString(),
+            'check_out' => $checkOut->toDateString(),
+        ]);
+
+        $this->get($availabilityUrl)->assertOk()->assertJsonPath('rooms.0.available', 0);
+
+        $this->actingAs($admin)
+            ->post(route('admin.bookings.cancel', $booking))
+            ->assertRedirect(route('admin.bookings.show', $booking))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('bookings', [
+            'id' => $booking->id,
+            'booking_status' => 'cancelled',
+            'payment_status' => 'paid',
+        ]);
+        $this->get($availabilityUrl)->assertOk()->assertJsonPath('rooms.0.available', 1);
+    }
+
+    public function test_admin_room_inventory_uses_total_rooms_and_renders_live_availability(): void
+    {
+        $admin = User::create([
+            'name' => 'Room Admin',
+            'email' => 'room-admin@example.com',
+            'password' => 'test-password',
+            'role' => 'admin',
+        ]);
+        $hotel = Hotel::create([
+            'hotel_name' => 'Admin inventory hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 1000,
+            'status' => true,
+        ]);
+        $roomType = RoomType::create(['name' => 'Premium', 'status' => true]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.rooms.store'), [
+                'hotel_id' => $hotel->id,
+                'room_name' => 'Premium room',
+                'room_number' => 'ADMIN-INV-1',
+                'room_type_id' => $roomType->id,
+                'total_rooms' => 5,
+                'capacity' => 3,
+                'price_per_night' => 2500,
+                'description' => 'Room inventory test',
+                'amenities_text' => 'Wi-Fi, Balcony',
+                'status' => 1,
+            ])
+            ->assertRedirect(route('admin.rooms.index'));
+
+        $room = Room::query()->where('room_number', 'ADMIN-INV-1')->firstOrFail();
+        $this->assertSame(5, $room->total_rooms);
+        $this->assertSame(5, $room->available_rooms);
+        $this->assertSame(['Wi-Fi', 'Balcony'], $room->amenities);
+
+        $this->get(route('admin.rooms.index'))
+            ->assertOk()
+            ->assertSee('Total Inventory')
+            ->assertSee('By night')
+            ->assertSee('Admin inventory hotel');
+        $this->get(route('admin.rooms.show', $room))
+            ->assertOk()
+            ->assertSee('available today');
+
+        $this->put(route('admin.rooms.update', $room), [
+            'hotel_id' => $hotel->id,
+            'room_name' => 'Premium room',
+            'room_number' => 'ADMIN-INV-1',
+            'room_type_id' => $roomType->id,
+            'total_rooms' => 7,
+            'capacity' => 3,
+            'price_per_night' => 2500,
+            'description' => 'Room inventory test',
+            'amenities_text' => 'Wi-Fi, Balcony',
+            'status' => 1,
+        ])->assertRedirect(route('admin.rooms.index'));
+
+        $this->assertDatabaseHas('rooms', [
+            'id' => $room->id,
+            'total_rooms' => 7,
+            'available_rooms' => 7,
+        ]);
     }
 
     private function addColumns(string $tableName, array $columns): void

@@ -40,6 +40,10 @@
         </div>
 
         <div class="card-body-custom">
+            @if ($room->image_path)
+                <img src="{{ asset('storage/'.$room->image_path) }}" alt="{{ $room->room_name }}"
+                    class="img-fluid rounded mb-4" style="max-height:280px;object-fit:cover">
+            @endif
             <!-- Row 1: Hotel & Room Type -->
             <div class="row">
                 <div class="col-md-6">
@@ -123,11 +127,18 @@
                         </div>
                         <div class="info-content">
                             <span class="info-label">Available</span>
-                            <span class="info-value">{{ $room->available_rooms }} <small>left</small></span>
+                            <span class="info-value">{{ $availability['available'] }} <small>available today</small></span>
                         </div>
                     </div>
                 </div>
             </div>
+
+            @if ($room->amenities)
+                <div class="mt-3">
+                    <span class="info-label d-block">Amenities</span>
+                    <span class="info-value">{{ implode(' · ', $room->amenities) }}</span>
+                </div>
+            @endif
 
             <!-- Row 4: Price & Status -->
             <div class="row mt-3">

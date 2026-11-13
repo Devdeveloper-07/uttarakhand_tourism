@@ -3738,3 +3738,639 @@
         font-size: .78rem;
     }
 }
+
+/* Hotel details page polish */
+.frontend-site #mmtHero .mmt-hero-top { padding: 28px 0 22px; background: linear-gradient(135deg, #f3f8fc 0%, #fff 68%); }
+.frontend-site #mmtHero .mmt-breadcrumb { margin-bottom: 18px; color: #718397; font-size: .82rem; }
+.frontend-site #mmtHero .mmt-hero-header { align-items: flex-end; gap: 20px; }
+.frontend-site #mmtHero .mmt-hotel-info h1 { margin: 0 0 12px; color: #173651; font-size: clamp(1.8rem, 3vw, 2.65rem); font-weight: 800; letter-spacing: -.035em; line-height: 1.12; }
+.frontend-site #mmtHero .mmt-hotel-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.frontend-site #mmtHero .mmt-star-badge { border-radius: 999px; padding: 7px 11px; color: #81520a; background: #fff4d8; font-size: .78rem; font-weight: 750; }
+.frontend-site #mmtHero .mmt-location-text { color: #64788b; font-size: .9rem; }
+.frontend-site #mmtHero .mmt-action-btn { min-height: 40px; border: 1px solid #dce6ef; border-radius: 999px; padding: 0 14px; color: #25445e; background: #fff; font-weight: 650; }
+.frontend-site #mmtGalleryWrap { padding-bottom: 12px; }
+.frontend-site #mmtSingleImage { overflow: hidden; border-radius: 20px; background: #e9f0f5; box-shadow: 0 18px 48px rgba(20, 48, 72, .14); }
+.frontend-site #mmtMainImage { display: block; width: 100%; max-height: 500px; object-fit: cover; }
+.frontend-site #mmtMain { padding-top: 28px; }
+.frontend-site #mmtRatingStrip, .frontend-site #mmtQuickInfo, .frontend-site #mmtMain .mmt-card { border-color: #e3eaf0; border-radius: 18px; box-shadow: 0 10px 30px rgba(23, 54, 81, .055); }
+.frontend-site #mmtRatingStrip { gap: 20px; padding: 18px; }
+.frontend-site #mmtHighlights { column-gap: 12px; }
+.frontend-site #mmtMain .mmt-card { margin-bottom: 18px; }
+.frontend-site #mmtMain .mmt-card-header { display: flex; align-items: center; gap: 11px; padding: 20px 22px 0; }
+.frontend-site #mmtMain .mmt-card-header h2 { margin: 0; color: #173651; font-size: 1.12rem; font-weight: 780; }
+.frontend-site #mmtMain .mmt-card-body { padding: 17px 22px 22px; color: #53697d; line-height: 1.75; }
+.frontend-site #bookingSection { top: 105px; border-color: #dce7f0; border-radius: 20px; box-shadow: 0 20px 48px rgba(23, 54, 81, .12); }
+.frontend-site #mmtBookingHeader { align-items: flex-start; padding: 22px; background: linear-gradient(135deg, #f0f7fb, #fff); }
+.frontend-site #mmtBookingBody { padding: 20px 22px; }
+.frontend-site #mmtBookingForm { gap: 16px; }
+.frontend-site #mmtBookingForm .mmt-form-group label { margin-bottom: 7px; color: #41596e; font-size: .78rem; font-weight: 750; }
+.frontend-site #mmtBookingForm .mmt-input-box input, .frontend-site #mmtBookingForm .mmt-input-box select, .frontend-site #mmtBookingForm .mmt-form-group input, .frontend-site #mmtBookingForm .mmt-form-group select { min-height: 48px; border-color: #d8e2eb; border-radius: 10px; padding-inline: 12px; }
+.frontend-site #mmtBookingForm input:focus, .frontend-site #mmtBookingForm select:focus { border-color: #6ba4da; outline: 0; box-shadow: 0 0 0 4px rgba(23, 104, 210, .1); }
+.frontend-site #mmtBookingForm button[type=submit] { min-height: 52px; border-radius: 11px; box-shadow: 0 8px 18px rgba(23, 104, 210, .22); font-weight: 780; }
+.frontend-site #mmtBookingFooter { padding: 14px 22px; background: #f8fbfd; }
+.frontend-site #mmtStickyBar { z-index: 1020; border-top: 1px solid #e0e8ef; box-shadow: 0 -8px 28px rgba(23, 54, 81, .08); }
+@media (max-width: 991.98px) {
+    .frontend-site #bookingSection { position: static; top: auto; }
+    .frontend-site #mmtMain { padding-top: 22px; }
+}
+@media (max-width: 575.98px) {
+    .frontend-site #mmtHero .mmt-hero-top { padding: 20px 0 16px; }
+    .frontend-site #mmtHero .mmt-hero-header { align-items: flex-start; flex-direction: column; }
+    .frontend-site #mmtHero .mmt-hotel-actions { display: flex; gap: 8px; }
+    .frontend-site #mmtMain { padding-bottom: 36px; }
+    .frontend-site #mmtRatingStrip { align-items: stretch; flex-direction: column; }
+    .frontend-site #mmtRatingBox { align-self: flex-start; }
+    .frontend-site #mmtHighlights { grid-template-columns: minmax(0, 1fr); }
+    .frontend-site #mmtMain .mmt-card-header { padding-inline: 17px; }
+    .frontend-site #mmtMain .mmt-card-body { padding: 14px 17px 18px; }
+    .frontend-site #mmtBookingHeader, .frontend-site #mmtBookingBody { padding-inline: 17px; }
+    .frontend-site #mmtBookingForm .mmt-form-row { grid-template-columns: minmax(0, 1fr); }
+    .frontend-site #mmtStickyInner { gap: 10px; }
+}
+
+/* Hotel detail components */
+.frontend-site #mmtMain {
+    background: #f3f7fa;
+}
+
+.frontend-site #mmtMainLeft,
+.frontend-site #mmtMainRight {
+    min-width: 0;
+}
+
+.frontend-site #mmtMain .mmt-card {
+    overflow: hidden;
+    padding: 0;
+}
+
+.frontend-site #mmtMain .mmt-card-header {
+    padding: 20px 22px 0;
+}
+
+.frontend-site #mmtMain .mmt-card-body {
+    padding: 16px 22px 22px;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-summary {
+    display: grid;
+    grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+    border-bottom: 1px solid #e8eef3;
+    padding-bottom: 20px;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-score-box {
+    display: flex;
+    min-height: 150px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid #dfece6;
+    border-radius: 16px;
+    padding: 18px 12px;
+    background: linear-gradient(145deg, #f3faf6, #fff);
+    text-align: center;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-number {
+    color: #173651;
+    font-family: Manrope, sans-serif;
+    font-size: 2rem;
+    font-weight: 850;
+    line-height: 1;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-stars {
+    display: flex;
+    gap: 4px;
+    color: #e7a42a;
+    font-size: .88rem;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-stars .empty {
+    color: #d7e0e7;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-based {
+    color: #718093;
+    font-size: .75rem;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-bars {
+    display: grid;
+    gap: 12px;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-bar-item {
+    display: grid;
+    grid-template-columns: minmax(100px, 138px) minmax(40px, 1fr) 36px;
+    align-items: center;
+    gap: 12px;
+}
+
+.frontend-site #mmtReviewsCard .mmt-bar-label {
+    color: #53697d;
+    font-size: .82rem;
+}
+
+.frontend-site #mmtReviewsCard .mmt-bar {
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #eaf0f4;
+}
+
+.frontend-site #mmtReviewsCard .mmt-bar-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #13805d, #4db58b);
+}
+
+.frontend-site #mmtReviewsCard .mmt-bar-value {
+    color: #173651;
+    font-size: .8rem;
+    font-weight: 750;
+    text-align: right;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #e0eaf1;
+    border-radius: 999px;
+    padding: 7px 10px;
+    color: #426078;
+    background: #f7fafc;
+    font-size: .76rem;
+    font-weight: 650;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-tag i {
+    color: #12805c;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-highlight {
+    margin-top: 18px;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-highlight h4,
+.frontend-site #mmtNearbyTitle {
+    margin: 0 0 10px;
+    color: #173651;
+    font-size: .95rem;
+    font-weight: 800;
+}
+
+.frontend-site #mmtReviewsCard .mmt-review-highlight p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin: 0;
+    color: #607588;
+    font-size: .83rem;
+}
+
+.frontend-site #mmtNearby {
+    margin-top: 20px;
+}
+
+.frontend-site #mmtNearbyGrid,
+.frontend-site #mmtRulesGrid {
+    gap: 10px;
+}
+
+.frontend-site #mmtNearbyGrid .mmt-nearby-item,
+.frontend-site #mmtRulesGrid .mmt-rule-item {
+    display: flex;
+    min-height: 64px;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #e3ebf1;
+    border-radius: 12px;
+    padding: 12px;
+    color: #50677b;
+    background: #fbfcfd;
+    font-size: .82rem;
+}
+
+.frontend-site #mmtNearbyGrid .mmt-nearby-item > i,
+.frontend-site #mmtRulesGrid .mmt-rule-item > i {
+    flex: 0 0 18px;
+    color: #087dbb;
+    text-align: center;
+}
+
+.frontend-site #mmtNearbyGrid .mmt-nearby-item small {
+    display: block;
+    margin-top: 2px;
+    color: #8291a0;
+}
+
+.frontend-site #mmtRulesGrid .mmt-rule-item {
+    align-items: flex-start;
+}
+
+.frontend-site #mmtRulesGrid .mmt-rule-item > div {
+    display: grid;
+    gap: 2px;
+}
+
+.frontend-site #mmtRulesGrid .mmt-rule-item strong {
+    color: #29465e;
+    font-size: .83rem;
+}
+
+.frontend-site #mmtRulesGrid .mmt-rule-item span {
+    color: #748596;
+    font-size: .78rem;
+}
+
+.frontend-site #mmtBookingSection {
+    overflow: visible;
+}
+
+.frontend-site #mmtQuickContact {
+    padding: 16px 20px 0;
+}
+
+.frontend-site #mmtQuickContact .mmt-quick-btn {
+    flex: 1 1 120px;
+    min-height: 42px;
+    border-radius: 10px;
+}
+
+.frontend-site #mmtFaqSection {
+    margin: 0 20px;
+    border-top: 1px solid #e8eef3;
+    padding: 18px 0 4px;
+}
+
+.frontend-site #mmtFaqTitle,
+.frontend-site #mmtSocialTitle {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 12px;
+    color: #173651;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.frontend-site #mmtFaqTitle i {
+    color: #087dbb;
+}
+
+.frontend-site #mmtFaqSection .mmt-faq-item {
+    margin: 0 0 8px;
+    border: 1px solid #e4ebf1;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.frontend-site #mmtFaqSection .mmt-faq-question {
+    width: 100%;
+    min-height: 44px;
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: #29465e;
+    background: #f8fafc;
+    font: inherit;
+    font-size: .82rem;
+    font-weight: 700;
+    text-align: left;
+}
+
+.frontend-site #mmtFaqSection .mmt-faq-question:hover {
+    color: #087dbb;
+    background: #f0f7fb;
+}
+
+.frontend-site #mmtFaqSection .mmt-faq-question i {
+    flex: 0 0 auto;
+    color: #718397;
+    transition: transform .2s ease;
+}
+
+.frontend-site #mmtFaqSection .mmt-faq-answer {
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 12px;
+    color: #697d8f;
+    transition: max-height .22s ease, padding .22s ease;
+}
+
+.frontend-site #mmtFaqSection .mmt-faq-answer p {
+    margin: 0;
+    padding: 0 0 12px;
+    font-size: .8rem;
+    line-height: 1.65;
+}
+
+.frontend-site #mmtSocialGrid {
+    padding: 16px 20px;
+}
+
+.frontend-site #mmtSocialTitle {
+    margin-bottom: 10px;
+}
+
+.frontend-site #mmtSocialLinks {
+    display: flex;
+    gap: 8px;
+}
+
+.frontend-site #mmtSocialLinks .mmt-social-link {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid #e2eaf0;
+    border-radius: 50%;
+    color: #536c80;
+    background: #fff;
+    transition: color .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.frontend-site #mmtSocialLinks .mmt-social-link:hover {
+    border-color: #087dbb;
+    color: #fff;
+    background: #087dbb;
+}
+
+.frontend-site #mmtBookingFooter {
+    display: grid;
+    gap: 12px;
+    border-top: 1px solid #e8eef3;
+    border-radius: 0 0 20px 20px;
+    padding: 15px 20px;
+}
+
+.frontend-site #mmtBookingFooter .mmt-contact-item {
+    min-width: 0;
+}
+
+.frontend-site #mmtBookingFooter .mmt-contact-text {
+    display: grid;
+    gap: 2px;
+}
+
+.frontend-site #mmtBookingFooter .mmt-contact-text small {
+    color: #8291a0;
+    font-size: .72rem;
+}
+
+.frontend-site #mmtBookingFooter .mmt-contact-text span {
+    color: #435d72;
+    font-size: .8rem;
+    overflow-wrap: anywhere;
+}
+
+.frontend-site #mmtRelatedSection {
+    padding: 52px 0 72px;
+    background: #f3f7fa;
+}
+
+.frontend-site #mmtRelatedHeader {
+    margin-bottom: 24px;
+}
+
+.frontend-site #mmtRelatedLabel {
+    color: #087dbb;
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.frontend-site #mmtRelatedTitle {
+    margin: 5px 0 6px;
+    color: #173651;
+    font-size: clamp(1.7rem, 3vw, 2.2rem);
+    letter-spacing: -.04em;
+}
+
+.frontend-site #mmtRelatedDesc {
+    margin: 0;
+    color: #718397;
+}
+
+.frontend-site #mmtRelatedDivider {
+    width: 48px;
+    height: 3px;
+    margin-top: 16px;
+    border-radius: 99px;
+    background: #087dbb;
+}
+
+.frontend-site #mmtRelatedRow {
+    margin-top: 0;
+}
+
+.frontend-site #mmtRelatedRow > [class*="col-"] {
+    display: flex;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-card {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    border: 1px solid #e1e9ef;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(16, 43, 70, .055);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 34px rgba(16, 43, 70, .11);
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-img-wrap {
+    position: relative;
+    height: 190px;
+    flex: 0 0 190px;
+    overflow: hidden;
+    background: #e9f0f5;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .35s ease;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-card:hover .mmt-related-img-wrap img {
+    transform: scale(1.04);
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 8px;
+    padding: 6px 9px;
+    color: #fff;
+    background: #12805c;
+    font-size: .77rem;
+    font-weight: 800;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-save {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    color: #526a80;
+    background: rgba(255, 255, 255, .95);
+    cursor: pointer;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 16px;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-body h4 {
+    margin: 0 0 8px;
+    color: #173651;
+    font-size: 1.03rem;
+    line-height: 1.4;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-location {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    color: #718397;
+    font-size: .82rem;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-location i {
+    margin-top: 4px;
+    color: #087dbb;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    border-top: 1px solid #edf1f4;
+    padding: 14px 0 0;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-price {
+    color: #173651;
+    font-size: 1.03rem;
+    font-weight: 800;
+}
+
+.frontend-site #mmtRelatedRow .mmt-related-price small {
+    display: block;
+    color: #8291a0;
+    font-size: .72rem;
+    font-weight: 500;
+}
+
+.frontend-site #mmtRelatedRow .mmt-btn-related,
+.frontend-site #mmtNoRelated .mmt-btn-explore {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 9px;
+    padding: 9px 13px;
+    color: #fff;
+    background: #087dbb;
+    font-size: .82rem;
+    font-weight: 750;
+}
+
+.frontend-site #mmtNoRelated {
+    border: 1px dashed #d7e2ea;
+    border-radius: 16px;
+    padding: 38px 20px;
+    background: #fff;
+    text-align: center;
+}
+
+.frontend-site #mmtNoRelated > i {
+    color: #087dbb;
+    font-size: 2rem;
+}
+
+.frontend-site #mmtNoRelated h4 {
+    margin: 12px 0 6px;
+}
+
+.frontend-site #mmtNoRelated p {
+    margin-bottom: 16px;
+    color: #718397;
+}
+
+@media (max-width: 767.98px) {
+    .frontend-site #mmtReviewsCard .mmt-review-summary {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .frontend-site #mmtReviewsCard .mmt-review-score-box {
+        min-height: 120px;
+    }
+
+    .frontend-site #mmtReviewsCard .mmt-review-bar-item {
+        grid-template-columns: minmax(82px, 110px) minmax(30px, 1fr) 32px;
+        gap: 8px;
+    }
+
+    .frontend-site #mmtMain .mmt-card-header {
+        padding-inline: 17px;
+    }
+
+    .frontend-site #mmtMain .mmt-card-body {
+        padding: 14px 17px 18px;
+    }
+
+    .frontend-site #mmtQuickContact {
+        padding-inline: 16px;
+    }
+
+    .frontend-site #mmtFaqSection {
+        margin-inline: 16px;
+    }
+
+    .frontend-site #mmtSocialGrid,
+    .frontend-site #mmtBookingFooter {
+        padding-inline: 16px;
+    }
+
+    .frontend-site #mmtRelatedSection {
+        padding: 38px 0 52px;
+    }
+}

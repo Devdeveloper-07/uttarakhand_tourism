@@ -30,9 +30,21 @@
             <a href="{{ route('admin.bookings.index') }}" class="btn btn-outline-secondary">
                 <i class="fa-solid fa-arrow-left me-1"></i> Back to bookings
             </a>
+            @if (in_array($booking->booking_status, ['pending', 'confirmed'], true))
+                <form method="POST" action="{{ route('admin.bookings.cancel', $booking) }}"
+                    onsubmit="return confirm('Cancel this booking and release its room inventory?')">
+                    @csrf
+                    <button class="btn btn-outline-danger" type="submit">
+                        <i class="fa-solid fa-ban me-1"></i> Cancel booking
+                    </button>
+                </form>
+            @endif
         </div>
     </div>
 
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
     <div class="content-card mb-4">
         <div class="card-body-custom">
             <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">

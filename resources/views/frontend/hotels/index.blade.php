@@ -28,6 +28,13 @@
 <section class="filter-bar">
     <div class="container">
         <div class="filter-wrapper">
+            @if ($errors->any())
+                <div class="alert alert-danger" role="alert">
+                    @foreach ($errors->all() as $error)
+                        <div>{{ $error }}</div>
+                    @endforeach
+                </div>
+            @endif
             <form action="{{ route('hotels') }}" method="GET" class="filter-form" id="hotelFilterForm">
                 <div class="filter-group">
                     <label><i class="fa-solid fa-magnifying-glass"></i> Search Hotel</label>
@@ -54,10 +61,20 @@
                         <option value="10000" {{ request('price') == '10000' ? 'selected' : '' }}>Under ₹10,000</option>
                     </select>
                 </div>
+                <div class="filter-group">
+                    <label><i class="fa-regular fa-calendar"></i> Check-in</label>
+                    <input type="date" name="check_in" min="{{ now()->toDateString() }}"
+                        value="{{ request('check_in') }}">
+                </div>
+                <div class="filter-group">
+                    <label><i class="fa-regular fa-calendar-check"></i> Check-out</label>
+                    <input type="date" name="check_out" min="{{ now()->addDay()->toDateString() }}"
+                        value="{{ request('check_out') }}">
+                </div>
                 <button type="submit" class="filter-btn">
                     <i class="fa-solid fa-paper-plane"></i> Search
                 </button>
-                @if(request()->has('search') || request()->has('location') || request()->has('price'))
+                @if(request()->has('search') || request()->has('location') || request()->has('price') || request()->has('check_in') || request()->has('check_out'))
                     <a href="{{ route('hotels') }}" class="filter-reset" title="Clear Filters">
                         <i class="fa-solid fa-xmark"></i>
                     </a>
@@ -195,7 +212,18 @@
                     @endif
                     <div class="mmt-price">₹{{ number_format($nightPrice) }}</div>
                     <span class="mmt-unit">per night + taxes</span>
-                    <a href="{{ route('hotel.details', $hotel->id) }}" class="mmt-book">BOOK NOW</a>
+                    @if (isset($hotelAvailability[$hotel->id]))
+                        <span class="d-block small {{ $hotelAvailability[$hotel->id]['available'] > 0 ? 'text-success' : 'text-danger' }}">
+                            {{ $hotelAvailability[$hotel->id]['available'] }} of {{ $hotelAvailability[$hotel->id]['total'] }} rooms available for selected dates
+                        </span>
+                    @elseif ($hotel->rooms->isNotEmpty())
+                        <span class="d-block small text-muted">Select dates to see live availability</span>
+                    @endif
+                    <a href="{{ route('hotel.details', [
+                        'id' => $hotel->id,
+                        'check_in' => request('check_in'),
+                        'check_out' => request('check_out'),
+                    ]) }}" class="mmt-book">BOOK NOW</a>
                 </div>
             </article>
         @empty
@@ -236,6 +264,19 @@
 </section>
 
 <script>
+    const hotelCheckIn = document.querySelector('#hotelFilterForm input[name="check_in"]');
+    const hotelCheckOut = document.querySelector('#hotelFilterForm input[name="check_out"]');
+    if (hotelCheckIn && hotelCheckOut) {
+        const updateHotelCheckoutMinimum = () => {
+            if (!hotelCheckIn.value) return;
+            const [year, month, day] = hotelCheckIn.value.split('-').map(Number);
+            hotelCheckOut.min = new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
+            if (hotelCheckOut.value && hotelCheckOut.value < hotelCheckOut.min) hotelCheckOut.value = '';
+        };
+        hotelCheckIn.addEventListener('change', updateHotelCheckoutMinimum);
+        updateHotelCheckoutMinimum();
+    }
+
     document.getElementById('locationSelect').addEventListener('change', function() {
         document.getElementById('hotelFilterForm').submit();
     });
