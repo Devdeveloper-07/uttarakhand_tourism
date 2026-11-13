@@ -14,6 +14,7 @@ use App\Services\GstCalculator;
 use App\Services\RoomAvailability;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
@@ -307,13 +308,13 @@ class BookingPaymentController extends Controller
 
         if ($payment->payment_status !== 'paid') {
             try {
-                $gatewayPayment = $this->razorpayRequest()
-                    ->get('/payments/'.$validated['razorpay_payment_id']);
+                $gatewayPayment = $this->sendRazorpayRequest(
+                    'GET',
+                    '/payments/'.$validated['razorpay_payment_id'],
+                    $booking,
+                    $payment
+                );
             } catch (ConnectionException $exception) {
-                Log::warning('Razorpay payment verification could not connect.', [
-                    'payment_id' => $payment->id,
-                ]);
-
                 return $this->result(
                     $booking,
                     $payment,
@@ -351,15 +352,14 @@ class BookingPaymentController extends Controller
 
             if (($gatewayData['status'] ?? null) === 'authorized') {
                 try {
-                    $captureResponse = $this->razorpayRequest()->post(
+                    $captureResponse = $this->sendRazorpayRequest(
+                        'POST',
                         '/payments/'.$validated['razorpay_payment_id'].'/capture',
+                        $booking,
+                        $payment,
                         ['amount' => $expectedAmount, 'currency' => $payment->currency]
                     );
                 } catch (ConnectionException $exception) {
-                    Log::warning('Razorpay payment capture could not connect.', [
-                        'payment_id' => $payment->id,
-                    ]);
-
                     return $this->result(
                         $booking,
                         $payment,
@@ -546,13 +546,13 @@ class BookingPaymentController extends Controller
         );
 
         try {
-            $response = $this->razorpayRequest()
-                ->get('/payments/'.$validated['razorpay_payment_id']);
+            $response = $this->sendRazorpayRequest(
+                'GET',
+                '/payments/'.$validated['razorpay_payment_id'],
+                $payment->booking,
+                $payment
+            );
         } catch (ConnectionException $exception) {
-            Log::warning('Razorpay failed payment could not be checked.', [
-                'payment_id' => $payment->id,
-            ]);
-
             return response()->json([
                 'message' => 'Payment failure could not be confirmed. Your room hold will expire automatically if payment is not completed.',
             ], 503);
@@ -794,18 +794,23 @@ class BookingPaymentController extends Controller
         }
 
         try {
-            $response = $this->razorpayRequest()->post('/orders', [
-                'amount' => $amountPaise,
-                'currency' => 'INR',
-                'receipt' => $bookingNumber,
-                'notes' => [
-                    'booking_id' => (string) $booking->id,
-                    'booking_type' => $itemType,
-                ],
-            ]);
+            $response = $this->sendRazorpayRequest(
+                'POST',
+                '/orders',
+                $booking,
+                $payment,
+                [
+                    'amount' => $amountPaise,
+                    'currency' => 'INR',
+                    'receipt' => $bookingNumber,
+                    'notes' => [
+                        'booking_id' => (string) $booking->id,
+                        'booking_type' => $itemType,
+                    ],
+                ]
+            );
         } catch (ConnectionException $exception) {
             $this->markOrderCreationFailed($booking, $payment);
-            Log::error('Razorpay order creation could not connect.', ['booking_id' => $booking->id]);
 
             return back()->withInput()->withErrors([
                 'payment' => 'Could not connect to the payment service. Please try again.',
@@ -943,6 +948,57 @@ class BookingPaymentController extends Controller
             ->acceptJson()
             ->asJson()
             ->timeout(20);
+    }
+
+    private function sendRazorpayRequest(
+        string $method,
+        string $path,
+        Booking $booking,
+        Payment $payment,
+        array $payload = []
+    ): Response {
+        $startedAt = hrtime(true);
+        $endpoint = 'https://api.razorpay.com/v1'.$path;
+
+        try {
+            $client = $this->razorpayRequest();
+            $response = match (strtoupper($method)) {
+                'GET' => $client->get($path),
+                'POST' => $client->post($path, $payload),
+                default => throw new \InvalidArgumentException('Unsupported Razorpay HTTP method.'),
+            };
+        } catch (ConnectionException $exception) {
+            $durationMs = (int) round((hrtime(true) - $startedAt) / 1_000_000);
+            $message = $exception->getMessage();
+            foreach ([config('services.razorpay.key'), config('services.razorpay.secret')] as $credential) {
+                if (is_string($credential) && $credential !== '') {
+                    $message = str_replace($credential, '[redacted]', $message);
+                }
+            }
+
+            Log::error('Razorpay API connection failed.', [
+                'exception_class' => get_class($exception),
+                'exception_message' => Str::limit($message, 500),
+                'booking_id' => $booking->id,
+                'payment_id' => $payment->id,
+                'endpoint' => $endpoint,
+                'duration_ms' => $durationMs,
+            ]);
+
+            throw $exception;
+        }
+
+        if (! $response->successful()) {
+            Log::warning('Razorpay API returned an unsuccessful response.', [
+                'booking_id' => $booking->id,
+                'payment_id' => $payment->id,
+                'endpoint' => $endpoint,
+                'duration_ms' => (int) round((hrtime(true) - $startedAt) / 1_000_000),
+                'http_status' => $response->status(),
+            ]);
+        }
+
+        return $response;
     }
 
     private function result(Booking $booking, Payment $payment, string $status, string $message)

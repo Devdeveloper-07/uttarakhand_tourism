@@ -3431,14 +3431,7 @@
     margin-bottom: 12px;
 }
 
-.site-footer .footer-logo img {
-    width: 48px;
-    height: 48px;
-    flex: 0 0 48px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-position: left center;
-}
+.site-footer .footer-brand-emblem{width:46px;height:46px;border-radius:14px;color:#d7effa;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.16);font-size:22px}
 
 .site-footer .footer-logo-text span,
 .site-footer .footer-logo-text small {

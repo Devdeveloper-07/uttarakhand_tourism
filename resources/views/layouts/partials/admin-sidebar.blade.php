@@ -3,7 +3,7 @@
     <!-- Logo -->
     <div class="sidebar-brand">
        <div class="welcome-icon">
-                    <img src="{{ asset('assets/logo/logo.png') }}" alt="Uttarakhand Travels logo" class="welcome-logo">
+                    <i class="fa-solid fa-mountain-sun" aria-hidden="true"></i>
 </div>
         <div class="brand-text">
             <h4>Uttarakhand</h4>

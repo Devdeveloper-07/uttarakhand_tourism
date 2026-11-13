@@ -1,0 +1,146 @@
+.frontend-site .mmt-home-hero {
+    min-height: 0;
+    padding: clamp(44px, 5vw, 68px) 0 38px;
+}
+
+.frontend-site .mmt-home-hero .home-eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin: 0 auto 18px;
+    text-align: center;
+}
+
+.frontend-site .mmt-home-hero h1 {
+    max-width: 940px;
+    margin: 0 auto 16px;
+    text-align: center;
+}
+
+.frontend-site .mmt-home-hero .lead-copy {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.frontend-site .mmt-search-card {
+    width: min(100%, 1210px);
+    max-width: 1210px;
+    margin: 44px auto 0;
+}
+
+.frontend-site .mmt-offer-strip {
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.frontend-site #stats-section {
+    padding-top: 38px;
+}
+
+.frontend-site .mmt-stat-row > .row {
+    justify-content: center;
+}
+
+.frontend-site .mmt-stat {
+    display: flex;
+    min-height: 100px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.frontend-site .mmt-stat .stat-number,
+.frontend-site .mmt-stat .stat-label {
+    width: 100%;
+    text-align: center;
+}
+
+.frontend-site .home-destinations-section {
+    padding: 48px 0 32px;
+}
+
+@media (max-width: 991.98px) {
+    .frontend-site .mmt-search-card {
+        margin-top: 36px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .frontend-site .mmt-home-hero {
+        min-height: 0;
+        padding: 38px 0 30px;
+    }
+
+    .frontend-site .mmt-home-hero h1 {
+        max-width: 680px;
+        font-size: clamp(2.2rem, 9vw, 3.65rem);
+    }
+
+    .frontend-site .mmt-home-hero .lead-copy {
+        max-width: 580px;
+        font-size: .96rem;
+    }
+
+    .frontend-site .mmt-search-card {
+        width: 100%;
+        margin-top: 30px;
+        border-radius: 16px;
+    }
+
+    .frontend-site .mmt-search-tabs {
+        gap: 4px;
+        padding-inline: 8px;
+    }
+
+    .frontend-site .mmt-search-tab {
+        flex: 1 1 0;
+        padding-inline: 12px;
+        text-align: center;
+    }
+
+    .frontend-site .mmt-search-body {
+        padding: 17px;
+    }
+
+    .frontend-site .mmt-offer-strip {
+        justify-content: center;
+    }
+
+    .frontend-site #stats-section {
+        padding-top: 30px;
+    }
+
+    .frontend-site .home-destinations-section {
+        padding: 36px 0 26px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .frontend-site .mmt-home-hero {
+        padding: 32px 0 26px;
+    }
+
+    .frontend-site .mmt-home-hero .home-eyebrow {
+        font-size: .72rem;
+    }
+
+    .frontend-site .mmt-home-hero h1 {
+        font-size: clamp(2rem, 9vw, 3rem);
+    }
+
+    .frontend-site .mmt-search-card {
+        margin-top: 26px;
+    }
+
+    .frontend-site .mmt-search-tab {
+        padding-inline: 8px;
+        font-size: .84rem;
+    }
+
+    .frontend-site .mmt-offer-strip {
+        justify-content: flex-start;
+    }
+}

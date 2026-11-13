@@ -2,8 +2,8 @@
     <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
         <div class="container">
             <a class="travel-brand" href="{{ route('home') }}" aria-label="Uttarakhand Travels home">
-                <span class="travel-brand-mark"><i class="bi bi-signpost-split-fill"></i></span>
-                <span><strong>Uttarakhand</strong><small>TRAVELS</small></span>
+                <span class="travel-brand-emblem" aria-hidden="true"><i class="fa-solid fa-mountain-sun"></i></span>
+                <span class="travel-brand-name"><strong>Uttarakhand</strong><small>Travels</small></span>
             </a>
             <button class="navbar-toggler travel-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#travelNav" aria-controls="travelNav" aria-expanded="false" aria-label="Open navigation">
                 <span class="navbar-toggler-icon"></span>

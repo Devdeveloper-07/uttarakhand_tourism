@@ -8,7 +8,6 @@
     .invoice-sheet{border:1px solid #dfe7ed;border-radius:16px;background:#fff;box-shadow:0 12px 38px rgba(16,43,70,.08)}
     .invoice-header{display:flex;justify-content:space-between;gap:24px;padding:28px 32px;border-bottom:1px solid #e8edf1}
     .invoice-brand{display:flex;align-items:center;gap:14px}
-    .invoice-logo{display:grid;width:54px;height:54px;place-items:center;border-radius:15px;color:#fff;background:#123d5c;font-size:1.35rem}
     .invoice-brand h1{margin:0;color:#123d5c;font-size:1.25rem}
     .invoice-brand p,.invoice-meta{margin:4px 0 0;color:#718092;font-size:.86rem}
     .invoice-body{padding:28px 32px}
@@ -40,7 +39,6 @@
             <article class="invoice-sheet">
                 <header class="invoice-header">
                     <div class="invoice-brand">
-                        <div class="invoice-logo"><i class="fa-solid fa-mountain-sun"></i></div>
                         <div>
                             <h1>Uttarakhand Travels</h1>
                             <p>Booking payment receipt</p>

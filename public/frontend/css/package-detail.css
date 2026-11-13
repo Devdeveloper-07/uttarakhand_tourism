@@ -1,0 +1,147 @@
+.frontend-site .package-detail-hero {
+    padding: 22px 0 28px;
+}
+
+.frontend-site .package-detail-hero .detail-gallery.no-thumbs {
+    width: min(100%, 1120px);
+    margin-inline: auto;
+    border-radius: 20px;
+    box-shadow: 0 16px 42px rgba(16, 43, 70, .12);
+}
+
+.frontend-site .package-detail-hero .detail-gallery.no-thumbs .gallery-main {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: auto;
+    background: transparent;
+}
+
+.frontend-site .package-detail-hero .detail-gallery.no-thumbs .gallery-main .main-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.frontend-site .package-detail-header {
+    padding: 24px 0;
+}
+
+.frontend-site .package-detail-header .detail-header-inner {
+    align-items: center;
+    gap: 36px;
+}
+
+.frontend-site .package-detail-header .detail-header-left {
+    flex: 1 1 auto;
+}
+
+.frontend-site .package-detail-content {
+    padding: 28px 0 60px;
+}
+
+.frontend-site .package-detail-content > .container > .row {
+    --bs-gutter-x: 24px;
+    --bs-gutter-y: 18px;
+    align-items: flex-start;
+}
+
+.frontend-site .package-detail-content .detail-sidebar {
+    top: 108px;
+}
+
+.frontend-site .package-detail-content .booking-card h4 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 20px;
+    font-size: 1.12rem;
+}
+
+.frontend-site .package-detail-content .traveler-counter {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) 46px;
+    align-items: stretch;
+    overflow: hidden;
+    border: 1px solid var(--travel-line);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.frontend-site .package-detail-content .traveler-counter .counter-btn {
+    display: grid;
+    width: 46px;
+    min-height: 46px;
+    place-items: center;
+    border: 0;
+    color: var(--travel-blue-dark);
+    background: #eaf5fb;
+    font-size: 1.25rem;
+    font-weight: 700;
+    transition: background .18s ease, color .18s ease;
+}
+
+.frontend-site .package-detail-content .traveler-counter .counter-btn:hover {
+    color: #fff;
+    background: var(--travel-blue);
+}
+
+.frontend-site .package-detail-content .traveler-counter .counter-btn:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline-offset: -3px;
+}
+
+.frontend-site .package-detail-content .traveler-counter #travelerCount {
+    width: 100%;
+    min-height: 46px;
+    border: 0;
+    border-right: 1px solid var(--travel-line);
+    border-left: 1px solid var(--travel-line);
+    border-radius: 0;
+    padding: 8px;
+    color: var(--travel-navy);
+    background: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    text-align: center;
+    appearance: textfield;
+}
+
+.frontend-site .package-detail-content .traveler-counter #travelerCount::-webkit-inner-spin-button,
+.frontend-site .package-detail-content .traveler-counter #travelerCount::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+}
+
+@media (max-width: 991.98px) {
+    .frontend-site .package-detail-hero .detail-gallery.no-thumbs {
+        width: min(100%, 980px);
+    }
+
+    .frontend-site .package-detail-content .detail-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .frontend-site .package-detail-hero {
+        padding: 14px 0 20px;
+    }
+
+    .frontend-site .package-detail-hero .detail-gallery.no-thumbs {
+        border-radius: 14px;
+    }
+
+    .frontend-site .package-detail-header {
+        padding: 20px 0;
+    }
+
+    .frontend-site .package-detail-header .detail-header-inner {
+        gap: 18px;
+    }
+
+    .frontend-site .package-detail-content {
+        padding: 20px 0 44px;
+    }
+}

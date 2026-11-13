@@ -2,10 +2,14 @@
 
 @section('title', 'Photo Gallery')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('frontend/css/gallery-page.css') }}?v={{ filemtime(public_path('frontend/css/gallery-page.css')) }}">
+@endpush
+
 @section('content')
 
 <!-- Page Banner -->
-<section class="page-banner">
+<section class="page-banner gallery-page-banner">
     <div class="hero-bg">
         <div class="hero-pattern"></div>
         <div class="hero-gradient-overlay"></div>
@@ -23,7 +27,7 @@
 </section>
 
 <!-- Gallery Stats -->
-<section class="gallery-stats">
+<section class="gallery-stats gallery-stats-section">
     <div class="container">
         <div class="stats-bar">
             <div class="stat">
@@ -48,13 +52,13 @@
 </section>
 
 <!-- Gallery Filter -->
-<section class="gallery-section">
+<section class="gallery-section gallery-page-section">
     <div class="container">
         <div class="gallery-header">
             <div class="filter-tabs">
-                <button class="filter-btn active" data-filter="all">All Photos</button>
+                <button class="filter-btn filter-chip active" data-filter="all">All Photos</button>
                 @foreach($galleries as $gallery)
-                    <button class="filter-btn" data-filter="cat-{{ $loop->index }}">{{ $gallery->title ?? 'Category ' . ($loop->index + 1) }}</button>
+                    <button class="filter-btn filter-chip" data-filter="cat-{{ $loop->index }}">{{ $gallery->title ?? 'Category ' . ($loop->index + 1) }}</button>
                 @endforeach
             </div>
         </div>
@@ -71,7 +75,7 @@
                     @foreach ($images as $image)
                         @php $imageIndex++; @endphp
                         <div class="gallery-item" data-category="cat-{{ $loop->parent->index }}">
-                            <div class="gallery-card" onclick="openLightbox({{ $imageIndex - 1 }})">
+                            <div class="gallery-card gallery-item-card" onclick="openLightbox({{ $imageIndex - 1 }})">
                                 <img src="{{ asset('uploads/gallery/' . $image) }}" alt="Gallery Image {{ $imageIndex }}" loading="lazy">
                                 <div class="gallery-overlay">
                                     <div class="overlay-content">
@@ -86,7 +90,7 @@
                     @endforeach
                 @endif
             @empty
-                <div class="empty-state">
+                <div class="empty-state gallery-empty">
                     <div class="empty-icon">
                         <i class="fa-regular fa-images"></i>
                     </div>

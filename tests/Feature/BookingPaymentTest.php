@@ -16,6 +16,7 @@ use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
@@ -619,6 +620,69 @@ class BookingPaymentTest extends TestCase
         ]);
         Http::assertSent(fn ($request) => $request->url() === 'https://api.razorpay.com/v1/orders'
             && $request['amount'] === 247800);
+    }
+
+    public function test_hotel_and_package_order_connection_failures_log_safe_diagnostics(): void
+    {
+        Log::spy();
+        Http::fake(function () {
+            throw new \Illuminate\Http\Client\ConnectionException(
+                'cURL error 60: proxy rejected test_secret during TLS verification.'
+            );
+        });
+
+        $hotel = Hotel::create([
+            'hotel_name' => 'Connection failure hotel',
+            'location' => 'Test location',
+            'city' => 'Test city',
+            'state' => 'Uttarakhand',
+            'description' => 'Test hotel description',
+            'starting_price' => 200,
+            'status' => true,
+        ]);
+        $this->post(route('hotel.booking.start', $hotel), [
+            'check_in' => now()->addDays(3)->toDateString(),
+            'check_out' => now()->addDays(4)->toDateString(),
+            'guests' => 1,
+            'rooms' => 1,
+            'name' => 'Test Guest',
+            'phone' => '+91 9876543210',
+            'email' => 'guest@example.com',
+        ])->assertRedirect()->assertSessionHasErrors('payment');
+
+        $package = Package::create([
+            'package_name' => 'Connection failure package',
+            'destination' => 'Test destination',
+            'duration' => 3,
+            'price' => 1000,
+            'discount_price' => 800,
+            'max_person' => 5,
+            'description' => 'Test package description',
+            'status' => true,
+        ]);
+        $this->post(route('package.booking.start', $package), [
+            'travel_date' => now()->addDays(10)->toDateString(),
+            'travelers' => 1,
+            'name' => 'Test Guest',
+            'phone' => '+91 9876543210',
+            'email' => 'guest@example.com',
+        ])->assertRedirect()->assertSessionHasErrors('payment');
+
+        $this->assertDatabaseCount('bookings', 2);
+        $this->assertDatabaseCount('payments', 2);
+        $this->assertSame(2, Booking::query()->where('booking_status', 'cancelled')->count());
+        $this->assertSame(2, Payment::query()->where('payment_status', 'failed')->count());
+        Log::shouldHaveReceived('error')->twice()->withArgs(function (string $message, array $context): bool {
+            return $message === 'Razorpay API connection failed.' &&
+                $context['exception_class'] === \Illuminate\Http\Client\ConnectionException::class &&
+                ! str_contains($context['exception_message'], 'test_secret') &&
+                $context['endpoint'] === 'https://api.razorpay.com/v1/orders' &&
+                is_int($context['booking_id']) &&
+                is_int($context['payment_id']) &&
+                is_int($context['duration_ms']) &&
+                ! array_key_exists('email', $context) &&
+                ! array_key_exists('phone', $context);
+        });
     }
 
     public function test_valid_gateway_signature_and_captured_payment_confirm_booking(): void

@@ -34,7 +34,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-brand">
                         <a href="{{ route('home') }}" class="footer-logo">
-                            <img src="{{ asset('assets/logo/logo.png') }}" alt="Uttarakhand Travels logo">
+                            <span class="footer-brand-emblem" aria-hidden="true"><i class="fa-solid fa-mountain-sun"></i></span>
                             <div class="footer-logo-text">
                                 <span>Uttarakhand</span>
                                 <small>Travels</small>

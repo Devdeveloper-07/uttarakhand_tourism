@@ -2,6 +2,10 @@
 
     @section('title',' Tour Package')
 
+    @push('styles')
+        <link rel="stylesheet" href="{{ asset('frontend/css/package-detail.css') }}?v={{ filemtime(public_path('frontend/css/package-detail.css')) }}">
+    @endpush
+
     @section('content')
 
 @php
@@ -23,7 +27,7 @@
         $initialTravelers = min(2, $maxTravelers);
     @endphp
 
-    <section class="detail-hero">
+    <section class="detail-hero package-detail-hero">
         <div class="container">
             @php
                 $mainImage = $package->thumbnail ? asset('uploads/packages/'.$package->thumbnail) : 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=600&fit=crop';
@@ -83,7 +87,7 @@
         </div>
     </section>
 
-    <section class="detail-header">
+    <section class="detail-header package-detail-header">
         <div class="container">
             <div class="detail-header-inner">
                 <div class="detail-header-left">
@@ -170,7 +174,7 @@
         </div>
     </section>
 
-    <section class="detail-content">
+    <section class="detail-content package-detail-content">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
@@ -400,137 +404,7 @@
                         </div>
                     </div>
 
-                    <div class="content-card" id="reviewsSection">
-                        <h3 class="card-title"><i class="fa-solid fa-star"></i> Customer Reviews</h3>
-                        @php $rating = $package->rating ?? 4.5; @endphp
-                        <div class="reviews-summary">
-                            <div class="rating-big">
-                                <span class="big-number">{{ $rating }}</span>
-                                <div class="big-stars">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        @if($i <= floor($rating))
-                                            <i class="fa-solid fa-star"></i>
-                                        @elseif($i - 0.5 <= $rating)
-                                            <i class="fa-solid fa-star-half-stroke"></i>
-                                        @else
-                                            <i class="fa-regular fa-star"></i>
-                                        @endif
-                                    @endfor
-                                </div>
-                                <span class="big-count">Based on {{ $package->reviews_count ?? rand(50,500) }} reviews</span>
-                            </div>
-                            <div class="rating-bars">
-                                @php $ratingDistribution = [5 => 65, 4 => 20, 3 => 10, 2 => 3, 1 => 2]; @endphp
-                                @foreach($ratingDistribution as $star => $percent)
-                                <div class="bar-row">
-                                    <span class="bar-label">{{ $star }} <i class="fa-solid fa-star"></i></span>
-                                    <div class="bar-track">
-                                        <div class="bar-fill" style="width: {{ $percent }}%"></div>
-                                    </div>
-                                    <span class="bar-percent">{{ $percent }}%</span>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
 
-                        <div class="reviews-list">
-                            @forelse($package->reviews ?? [] as $review)
-                            <div class="review-card">
-                                <div class="review-header">
-                                    <div class="reviewer-avatar">{{ strtoupper(substr($review->user_name ?? 'U', 0, 1)) }}</div>
-                                    <div class="reviewer-info">
-                                        <h5>{{ $review->user_name ?? 'Happy Traveler' }}</h5>
-                                        <span class="review-date">{{ $review->created_at ?? '2 weeks ago' }}</span>
-                                    </div>
-                                    <div class="review-rating">
-                                        @for($i = 1; $i <= 5; $i++)
-                                            @if($i <= ($review->rating ?? 5))
-                                                <i class="fa-solid fa-star"></i>
-                                            @else
-                                                <i class="fa-regular fa-star"></i>
-                                            @endif
-                                        @endfor
-                                    </div>
-                                </div>
-                                <p class="review-text">{{ $review->comment ?? 'Amazing experience! The package was well organized.' }}</p>
-                            </div>
-                            @empty
-                            <div class="review-card">
-                                <div class="review-header">
-                                    <div class="reviewer-avatar">R</div>
-                                    <div class="reviewer-info">
-                                        <h5>Rahul Sharma</h5>
-                                        <span class="review-date">2 weeks ago</span>
-                                    </div>
-                                    <div class="review-rating">
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star"></i>
-                                    </div>
-                                </div>
-                                <p class="review-text">Amazing experience! The package was well organized and the guide was very knowledgeable. The hotels were clean and comfortable. Would definitely recommend to everyone!</p>
-                            </div>
-                            <div class="review-card">
-                                <div class="review-header">
-                                    <div class="reviewer-avatar">P</div>
-                                    <div class="reviewer-info">
-                                        <h5>Priya Patel</h5>
-                                        <span class="review-date">1 month ago</span>
-                                    </div>
-                                    <div class="review-rating">
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star-half-stroke"></i>
-                                    </div>
-                                </div>
-                                <p class="review-text">Great value for money! The itinerary was perfectly planned. We got to see all the major attractions without feeling rushed.</p>
-                            </div>
-                            @endforelse
-                        </div>
-                    </div>
-
-                    <div class="content-card">
-                        <h3 class="card-title"><i class="fa-solid fa-circle-question"></i> Frequently Asked Questions</h3>
-                        @php
-                            $faqs = [];
-                            if(!empty($package->faqs)) {
-                                if(is_array($package->faqs)) {
-                                    $faqs = $package->faqs;
-                                } elseif(is_string($package->faqs)) {
-                                    $decoded = json_decode($package->faqs, true);
-                                    if(is_array($decoded)) {
-                                        $faqs = $decoded;
-                                    }
-                                }
-                            }
-                            if(empty($faqs)) {
-                                $faqs = [
-                                    ['question' => 'What is the cancellation policy?', 'answer' => 'Free cancellation up to 7 days before the trip. 50% refund for cancellations 3-7 days before.'],
-                                    ['question' => 'Is travel insurance included?', 'answer' => 'Basic travel insurance is included. We recommend purchasing additional coverage.'],
-                                    ['question' => 'Are meals included?', 'answer' => 'Daily breakfast and dinner are included. Lunch is not included to give you flexibility.'],
-                                    ['question' => 'What should I pack?', 'answer' => 'Comfortable clothing, walking shoes, sunscreen, personal medications, and a valid ID proof.'],
-                                    ['question' => 'Is this package suitable for children?', 'answer' => 'Yes, this package is family-friendly. Children above 5 years are welcome.']
-                                ];
-                            }
-                        @endphp
-                        <div class="faq-accordion">
-                            @foreach($faqs as $index => $faq)
-                            <div class="faq-item">
-                                <div class="faq-question" onclick="toggleFaq(this)">
-                                    <span class="faq-q">Q{{ $index + 1 }}. {{ is_array($faq) ? ($faq['question'] ?? $faq['q'] ?? '') : $faq }}</span>
-                                    <i class="fa-solid fa-plus faq-icon"></i>
-                                </div>
-                                <div class="faq-answer">
-                                    <p>{{ is_array($faq) ? ($faq['answer'] ?? $faq['a'] ?? '') : '' }}</p>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
                 </div>
 
                 <div class="col-lg-4">

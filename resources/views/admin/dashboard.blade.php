@@ -86,8 +86,7 @@
                 <div class="welcome-card">
                     <div class="welcome-content">
                         <div class="welcome-icon">
-                            <img src="{{ asset('assets/logo/logo.png') }}" alt="Uttarakhand Travels logo"
-                                class="welcome-logo">
+                            <i class="fa-solid fa-mountain-sun welcome-logo" aria-hidden="true"></i>
                         </div>
                         <div class="welcome-text">
                             <h3>Welcome back, {{ auth()->user()->name }}! 👋</h3>
